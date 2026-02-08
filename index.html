@@ -3,510 +3,1113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Samify Säljpolicy</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Samify Sales Dashboard V19 - Efficiency & Fixes</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Zapier Chatbot Script -->
+    <script async type='module' src='https://interfaces.zapier.com/assets/web-components/zapier-interfaces/zapier-interfaces.esm.js'></script>
 
     <style>
-/* 1. THE SETUP */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;600;700&display=swap');
+        
+        * { font-family: 'Inter', sans-serif; }
+        body { overflow: hidden; background-color: #f1f5f9; }
 
-* {
-  box-sizing: border-box;
-}
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #e2e8f0; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
-body {
-  background-color: #1a1a1a;
-  display: grid;
-  gap: 20px;
-  grid-template-columns: 1fr;
-  margin: 0;
-  min-height: 100vh;
-  padding: 20px 0;
-  place-items: center;
-}
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-.slide-container {
-  align-items: flex-start;
-  background-color: #0d0d0d;
-  border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  font-family: 'Montserrat', sans-serif;
-  gap: 30px;
-  height: 720px;
-  justify-content: center;
-  overflow: hidden;
-  padding: 60px;
-  position: relative;
-  width: 1280px;
-}
+        /* Phase Button Active State */
+        .phase-btn.active {
+            background-color: white;
+            color: #312e81; /* Indigo-900 */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
 
-/* 1.1 BACKGROUND STYLING */
+        /* Tabs */
+        .sub-tab.active {
+            border-bottom: 2px solid #4f46e5;
+            color: #4f46e5;
+            background-color: #eef2ff;
+        }
 
-.slide-container::before {
-  content: '';
-  height: 100%;
-  left: 0;
-  position: absolute;
-  top: 0;
-  width: 100%;
-  background: radial-gradient(circle at 90% 10%, rgba(222, 255, 154, 0.05) 0%, transparent 40%);
-  z-index: 0;
-}
+        /* ROI Toggle Switch */
+        .lever-card { transition: all 0.2s ease; border: 1px solid #e2e8f0; }
+        .lever-card.active { border-color: #4f46e5; background-color: #f5f3ff; box-shadow: 0 2px 5px rgba(79, 70, 229, 0.1); }
+        .lever-checkbox { accent-color: #4f46e5; width: 1.2rem; height: 1.2rem; }
 
-.slide-container::after {
-  background: linear-gradient(90deg, rgba(245, 245, 245, 0.1), transparent);
-  bottom: 50px;
-  content: '';
-  height: 1px;
-  left: 60px;
-  position: absolute;
-  right: 60px;
-}
+        /* Script Flow Styles */
+        .script-block { border-left: 3px solid #cbd5e1; padding-left: 1.5rem; margin-bottom: 2rem; position: relative; opacity: 0.5; transition: all 0.3s ease; }
+        .script-block.active { border-left-color: #4f46e5; opacity: 1; }
+        .script-block::before { content: ''; position: absolute; left: -10px; top: 0; width: 17px; height: 17px; border-radius: 50%; background: #cbd5e1; border: 3px solid #fff; }
+        .script-block.active::before { background: #4f46e5; }
 
-.slide-container > * {
-  position: relative;
-  z-index: 1;
-}
+        .pitch-btn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem; }
 
-/* 2. CONSISTENT TYPOGRAPHY */
+        /* Objection Accordion Logic */
+        .objection-content { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
+            opacity: 0;
+        }
+        .objection-content.open { 
+            max-height: 500px; /* Safe max-height to allow content */
+            opacity: 1;
+        }
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
 
-.slide-container h1,
-.slide-container h2,
-.slide-container h3,
-.slide-container h4 {
-  color: #ffffff;
-  font-weight: 700;
-  font-family: 'Montserrat', sans-serif;
-  margin: 0;
-  letter-spacing: -0.02em;
-}
+        /* Modal Styles */
+        #tip-modal {
+            background-color: rgba(15, 23, 42, 0.7); /* Slate-900 with opacity */
+            backdrop-filter: blur(4px);
+        }
+        #tip-content {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
-.slide-container h1 span,
-.slide-container h2 span,
-.slide-container strong {
-  color: #deff9a;
-}
-
-.slide-container p,
-.slide-container .subtitle,
-.slide-container li {
-  color: #e0e0e0;
-  font-family: 'Montserrat', sans-serif;
-}
-
-/* Font Sizes */
-
-.slide-container h1 {
-  font-size: 72px;
-  line-height: 1.1;
-}
-
-.slide-container .slide-title {
-  font-size: 48px;
-  line-height: 1.2;
-  margin-bottom: 20px;
-  width: 100%;
-  text-align: left;
-}
-
-.slide-container h3 {
-  font-size: 28px;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-
-.slide-container p, 
-.slide-container li {
-  font-size: 20px;
-  font-weight: 400;
-  line-height: 1.6;
-}
-
-.slide-container .subtitle {
-  font-size: 24px;
-  font-weight: 400;
-  line-height: 1.4;
-  margin-top: 20px;
-  opacity: 0.8;
-}
-
-.content-area {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    justify-content: center;
-    width: 100%;
-}
-
-/* 3. LAYOUT DEFINITIONS */
-
-/* Title Layout */
-.title-layout {
-  text-align: left;
-  max-width: 800px;
-}
-
-/* Section Title */
-.section-title-layout {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    justify-content: center;
-    text-align: center;
-    width: 100%;
-}
-
-.section-title-layout hr {
-    background-color: #deff9a;
-    border: none;
-    height: 4px;
-    margin: 30px auto;
-    width: 120px;
-}
-
-/* Two Column */
-.two-column {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  width: 100%;
-  align-items: center;
-  height: 100%;
-}
-
-/* Image Right Text Left */
-.image-wrapper {
-    border-radius: 16px;
-    overflow: hidden;
-    height: 400px;
-    width: 100%;
-    border: 1px solid rgba(255,255,255,0.1);
-}
-
-.image-wrapper img {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-}
-
-.two-column .image-wrapper img {
-    object-fit: contain; /* Specifically requested */
-}
-
-/* Tiled Content */
-.tiled-content {
-  display: grid;
-  gap: 30px;
-  grid-template-columns: repeat(3, 1fr);
-  width: 100%;
-}
-
-.tile {
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 30px;
-  text-align: left;
-}
-
-.tile .icon {
-  color: #deff9a;
-  font-size: 36px;
-  margin-bottom: 20px;
-}
-
-/* Bullet List */
-.bullet-list ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.bullet-list li {
-  margin-bottom: 25px;
-  padding-left: 40px;
-  position: relative;
-}
-
-.bullet-list li i {
-  color: #deff9a;
-  font-size: 24px;
-  left: 0;
-  position: absolute;
-  top: 4px;
-}
-
-/* Bleed Image Layout */
-.slide-container.bleed-image-layout {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  padding: 0;
-  gap: 0;
-  align-items: start;
-}
-
-.bleed-image-layout .content-container {
-  padding: 80px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
-}
-
-.bleed-image-layout .image-container {
-  height: 100%;
-  width: 100%;
-}
-
-.bleed-image-layout img.bleed-image-side {
-  height: 720px;
-  width: 100%;
-  object-fit: cover;
-}
-
-/* Quote Layout */
-.quote-layout {
-    text-align: center;
-    max-width: 900px;
-    margin: 0 auto;
-}
-
-.quote-layout blockquote {
-    font-size: 42px;
-    font-weight: 700;
-    line-height: 1.3;
-    margin: 0 0 30px 0;
-    color: #deff9a;
-}
-
-.quote-layout cite {
-    font-style: normal;
-    font-size: 24px;
-    color: #ffffff;
-    opacity: 0.7;
-}
-
-/* Full Background Image */
-.full-bg-image {
-    background-size: cover;
-    background-position: center;
-}
-
-.full-bg-image .content-overlay {
-    background: rgba(0, 0, 0, 0.7);
-    padding: 60px;
-    border-radius: 16px;
-    backdrop-filter: blur(10px);
-    max-width: 800px;
-    text-align: center;
-    border: 1px solid rgba(255,255,255,0.2);
-}
-
-/* Two Column Tiled Text (Grid for Mad Men) */
-.two-column.tiled {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-    align-items: stretch;
-}
-
-.two-column.tiled > div {
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 30px;
-}
-
+        /* Form Styles (Scoped) */
+        #behovsanalys-container { background: #ffffff; color: #1e293b; position: relative; }
+        #behovsanalys-container .form-step { display: none; animation: fadeIn 0.4s ease-out; }
+        #behovsanalys-container .form-step.active { display: block; }
+        #behovsanalys-container h3 { margin-top: 0; color: #0f172a; font-size: 1.5rem; margin-bottom: 10px; font-weight: 700; }
+        #behovsanalys-container p.step-desc { color: #64748b; margin-bottom: 25px; line-height: 1.5; font-size: 0.95rem; }
+        #behovsanalys-container label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: #334155; }
+        #behovsanalys-container input[type="text"], #behovsanalys-container input[type="email"], #behovsanalys-container input[type="tel"], #behovsanalys-container textarea, #behovsanalys-container select { width: 100%; padding: 12px 16px; margin-bottom: 20px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 14px; background: #f8fafc; transition: border 0.2s, box-shadow 0.2s; }
+        #behovsanalys-container input:focus, #behovsanalys-container textarea:focus, #behovsanalys-container select:focus { border-color: #2563eb; background: #fff; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        #behovsanalys-container .radio-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        #behovsanalys-container .radio-card { position: relative; }
+        #behovsanalys-container .radio-card input { opacity: 0; position: absolute; width: 0; }
+        #behovsanalys-container .radio-card label { display: block; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; text-align: center; cursor: pointer; background: #fff; transition: all 0.2s; font-weight: 500; margin: 0; font-size: 14px; }
+        #behovsanalys-container .radio-card input:checked + label { border-color: #2563eb; background-color: #eff6ff; color: #2563eb; font-weight: 700; }
+        #behovsanalys-container .btn-group { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
+        #behovsanalys-container button.form-btn { padding: 12px 28px; border: none; border-radius: 50px; cursor: pointer; font-size: 14px; font-weight: 600; transition: transform 0.2s, background 0.2s; }
+        #behovsanalys-container .btn-next, #behovsanalys-container .btn-submit { background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        #behovsanalys-container .btn-prev { background-color: white; color: #64748b; border: 1px solid #cbd5e1; }
+        #behovsanalys-container .btn-next:hover, #behovsanalys-container .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3); }
+        #behovsanalys-container .progress-wrapper { margin-bottom: 30px; }
+        #behovsanalys-container .progress-bg { background-color: #f1f5f9; height: 6px; border-radius: 3px; overflow: hidden; }
+        #behovsanalys-container .progress-bar { background-color: #2563eb; height: 100%; width: 0%; transition: width 0.4s ease; }
+        #behovsanalys-container .step-indicator { text-align: right; font-size: 0.75rem; color: #94a3b8; margin-top: 5px; font-weight: 600; }
+        #success-message { text-align: center; display: none; padding: 20px; }
+        #success-message h3 { color: #22c55e; font-size: 2rem; margin-bottom: 10px; }
+        #success-message p { color: #475569; font-size: 1.1rem; }
     </style>
 </head>
-<body>
+<body class="h-screen flex flex-col text-slate-800">
 
-<!-- Slide 1: Title Slide -->
-<div class="slide-container" id="slide1">
-    <div class="title-layout">
-        <h1>Samify Säljpolicy:<br><span>Mindset & Metodik</span></h1>
-        <p class="subtitle">En handbok för agilitet, energi och övertygelse i varje samtal.</p>
-    </div>
-</div>
-
-<!-- Slide 2: Manifesto (Quote) -->
-<div class="slide-container" id="slide2">
-    <div class="content-area">
-        <div class="quote-layout">
-            <blockquote>"Vi säljer inte kod eller integrationer. Vi säljer känslan av att gå hem på fredagen och veta att allt stämmer. Vi säljer frihet från administration."</blockquote>
-            <cite>— Samify Filosofi</cite>
-        </div>
-    </div>
-</div>
-
-<!-- Slide 3: Section Title - Vårt Sälj-DNA -->
-<div class="slide-container" id="slide3">
-    <div class="section-title-layout">
-        <hr>
-        <h2>Del 1: Vårt Sälj-DNA</h2>
-        <p>De tre lagarna som styr hur vi agerar.</p>
-    </div>
-</div>
-
-<!-- Slide 4: The 3 Laws (Tiled) -->
-<div class="slide-container" id="slide4">
-    <h2 class="slide-title">Våra Grundregler</h2>
-    <div class="content-area">
-        <div class="tiled-content">
-            <div class="tile">
-                <div class="icon"><i class="fa-solid fa-dragon"></i></div>
-                <h3>1. Kameleonten</h3>
-                <p>Var agil och kreativ. Anpassa dig efter kunden, ta in information live och sålla bort det onödiga.</p>
-            </div>
-            <div class="tile">
-                <div class="icon"><i class="fa-solid fa-wave-square"></i></div>
-                <h3>2. Frekvensen</h3>
-                <p>Hitta rätt energi. Är kunden stressad? Var lugn. Är kunden nyfiken? Höj energin och inspirera.</p>
-            </div>
-            <div class="tile">
-                <div class="icon"><i class="fa-solid fa-brain"></i></div>
-                <h3>3. Övertygelsen</h3>
-                <p>Tro på det du säljer. Om du tvekar, tvekar kunden. Din inre säkerhet är ditt starkaste verktyg.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Slide 5: Deep Dive - Chameleon -->
-<div class="slide-container" id="slide5">
-    <h2 class="slide-title">Var en Kameleont</h2>
-    <div class="content-area">
-        <div class="two-column">
-            <div>
-                <p>En Samify-säljare är aldrig en robot som läser innantill.</p>
-                <div class="bullet-list">
-                    <ul>
-                        <li><i class="fa-solid fa-check"></i> <strong>Anpassning:</strong> Du har en verktygslåda med olika vinklar. Plocka guldkornen och gör dem till dina egna.</li>
-                        <li><i class="fa-solid fa-check"></i> <strong>Relevans:</strong> Sålla bort "frimärkssamlingen". Prata bara om det som löser kundens specifika problem.</li>
-                        <li><i class="fa-solid fa-check"></i> <strong>Agilitet:</strong> Lyssna på signalerna och byt spår om det behövs.</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="image-wrapper">
-                <img src="http://googleusercontent.com/image_collection/image_retrieval/10454428959830362439" alt="Abstract chameleon adapting to environment">
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Slide 6: Deep Dive - Frequency -->
-<div class="slide-container" id="slide6">
-    <h2 class="slide-title">Hitta Rätt Frekvens</h2>
-    <div class="content-area">
-        <div class="two-column">
-            <div class="image-wrapper">
-                <img src="http://googleusercontent.com/image_collection/image_retrieval/4780815609063877039" alt="Sound wave frequency connection">
+    <!-- HEADER -->
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white px-6 py-3 shadow-lg shrink-0 z-30 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="bg-white/10 p-2 rounded-lg backdrop-blur-sm border border-white/10">
+                <i class="fa-solid fa-bolt text-yellow-400"></i>
             </div>
             <div>
-                <p>Använd ditt sjätte sinne för att kalibrera samtalet direkt:</p>
-                <div class="bullet-list">
-                    <ul>
-                        <li><i class="fa-solid fa-sliders"></i> <strong>Låter kunden stressad?</strong> Var lugn, trygg, rak och "No Bullshit". Spara deras tid.</li>
-                        <li><i class="fa-solid fa-bolt"></i> <strong>Låter kunden nyfiken?</strong> Höj energin, måla upp visionen och inspirera till tillväxt.</li>
-                        <li><i class="fa-solid fa-ban"></i> <strong>Målet:</strong> Väck intresse utan att vara en "pratkvarn" som tröttar ut.</li>
-                    </ul>
+                <h1 class="font-bold text-lg tracking-tight leading-none">Samify <span class="font-light opacity-70">OS</span></h1>
+                <div class="flex items-center gap-2 text-[10px] text-indigo-200 mt-1">
+                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                    Sales Playbook V19
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Slide 7: Deep Dive - Conviction (Bleed) -->
-<div class="slide-container bleed-image-layout" id="slide7">
-    <div class="content-container">
-        <h2 class="slide-title">Total Övertygelse</h2>
-        <div class="content-area">
-            <h3>Sanningen säljer</h3>
-            <p>Vi löser faktiska problem: App-fällan, dubbelarbete och admin-kaos. Det är sanningen.</p>
-            <h3>Hjärntvätta dig själv</h3>
-            <p>Du måste vara så övertygad om vår lösning att det hörs i varje stavelse. Forskning visar att ju starkare din egen övertygelse är, desto enklare är det att övertyga andra.</p>
-            <p>Om du tvekar, tvekar kunden. Äg din produkt.</p>
+        <!-- Navigation -->
+        <div class="flex gap-2 bg-black/20 p-1 rounded-xl border border-white/5">
+            <button onclick="setPhase('discovery')" id="btn-discovery" class="phase-btn active px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
+                <i class="fa-solid fa-calculator"></i> 1. Upptäck & ROI
+            </button>
+            <button onclick="setPhase('presentation')" id="btn-presentation" class="phase-btn px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 text-indigo-100 hover:bg-white/10">
+                <i class="fa-solid fa-microphone-lines"></i> 2. Säljmanus (Live)
+            </button>
+            <button onclick="setPhase('objection')" id="btn-objection" class="phase-btn px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 text-indigo-100 hover:bg-white/10">
+                <i class="fa-solid fa-shield-halved"></i> 3. Hantera
+            </button>
+            <button onclick="setPhase('closing')" id="btn-closing" class="phase-btn px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 text-indigo-100 hover:bg-white/10">
+                <i class="fa-solid fa-check"></i> 4. Stäng
+            </button>
         </div>
-    </div>
-    <div class="image-container">
-        <img class="bleed-image-side" src="http://googleusercontent.com/image_collection/image_retrieval/17011607308138560050" alt="Confident public speaker">
-    </div>
-</div>
 
-<!-- Slide 8: Section Title - Daglig Kalibrering -->
-<div class="slide-container" id="slide8">
-    <div class="section-title-layout">
-        <hr>
-        <h2>Del 2: Daglig Kalibrering</h2>
-        <p>Morgonrutinen för att hålla skärpan.</p>
-    </div>
-</div>
-
-<!-- Slide 9: Morning Routine (List) -->
-<div class="slide-container" id="slide9">
-    <h2 class="slide-title">Innan du lyfter luren...</h2>
-    <div class="content-area">
-        <div class="bullet-list" style="width: 100%; max-width: 1000px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
-            <ul>
-                <li><i class="fa-solid fa-magnifying-glass"></i> <strong>Detektiven:</strong> Gissa inte vad kunden behöver. Ta reda på fakta. Snoka. Hitta var det gör ont.</li>
-                <li><i class="fa-solid fa-comment-slash"></i> <strong>Våga Tystnaden:</strong> Ställ din fråga och var tyst. Låt kunden fylla tystnaden. Det är där informationen finns.</li>
-                <li><i class="fa-solid fa-fire"></i> <strong>Tinder-regeln:</strong> Gör inte en "Tinder-fail". Har ni bra snack? Våga fråga om dejten (affären). Låt det inte rinna ut i sanden.</li>
-            </ul>
-            <ul>
-                <li><i class="fa-solid fa-shield-halved"></i> <strong>Suck it up – Lös det:</strong> Finns det hinder? Fråga om dem rakt ut. Hantera dem. Skyll inte på omständigheter.</li>
-                <li><i class="fa-solid fa-church"></i> <strong>Katedralbyggaren:</strong> Staplar du sten (ringer samtal) eller bygger du en katedral (bygger bolaget)? Din inre bild avgör din energi.</li>
-            </ul>
+        <div class="flex gap-3">
+            <button class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+                <i class="fa-solid fa-user text-sm"></i>
+            </button>
         </div>
-    </div>
-</div>
+    </header>
 
-<!-- Slide 10: Section Title - Avancerad Metodik -->
-<div class="slide-container" id="slide10">
-    <div class="section-title-layout">
-        <hr>
-        <h2>Del 3: Avancerad Metodik</h2>
-        <p>Storytelling & Psykologi för strategiska affärer.</p>
-    </div>
-</div>
+    <!-- MAIN CONTAINER -->
+    <div class="flex-1 flex overflow-hidden min-h-0 bg-slate-100">
 
-<!-- Slide 11: Mad Men Techniques (Grid) -->
-<div class="slide-container" id="slide11">
-    <h2 class="slide-title">Storytelling-tekniker</h2>
-    <div class="content-area">
-        <div class="two-column tiled">
-            <div>
-                <h3><i class="fa-solid fa-hourglass-start" style="color:#deff9a; margin-right:10px;"></i> Sälj Tidsmaskinen</h3>
-                <p>Sluta prata API:er. Sälj känslan av total kontroll. "Tänk dig att gå hem klockan 16:00 på fredag och veta att allt stämmer."</p>
-            </div>
-            <div>
-                <h3><i class="fa-solid fa-rotate" style="color:#deff9a; margin-right:10px;"></i> Byt Samtalsämne</h3>
-                <p>Fastnar kunden i "budget"? Byt spelplan till "risk". "Har ni råd med kostnaden för ett misstag i er manuella hantering?"</p>
-            </div>
-            <div>
-                <h3><i class="fa-solid fa-bread-slice" style="color:#deff9a; margin-right:10px;"></i> It's Toasted</h3>
-                <p>Äg det självklara. "Vi kopplar inte bara ihop systemen, vi övervakar flödet åt er dygnet runt." Gör trygghet till er unika fördel.</p>
-            </div>
-            <div>
-                <h3><i class="fa-solid fa-bottle-droplet" style="color:#deff9a; margin-right:10px;"></i> Heinz-effekten</h3>
-                <p>Låt kunden fylla i luckorna. "Om du slapp admin-timmarna... vad skulle du göra då?" Låt dem sälja in lösningen till sig själva.</p>
-            </div>
-        </div>
-    </div>
-</div>
+        <!-- COLUMN 1: ARBETSYTA (75%) -->
+        <main class="w-3/4 flex flex-col border-r border-slate-200 relative overflow-hidden bg-white">
+            
+            <!-- VIEW 1: DISCOVERY & ROI -->
+            <div id="view-discovery" class="phase-view h-full flex flex-col overflow-hidden">
+                <div class="bg-indigo-50 border-b border-indigo-100 px-8 py-4 shrink-0 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-indigo-900"><i class="fa-solid fa-magnifying-glass mr-2"></i>Steg 1: Analysera & Kalkylera</h2>
+                        <p class="text-sm text-indigo-600 font-medium tracking-tight">
+                            <span class="font-bold">Agila:</span> Vi anpassar oss • <span class="font-bold">Tro:</span> Vi tror stenhårt på det vi gör • <span class="font-bold">Frekvens:</span> Affärer leder till affärer - högt tempo!
+                        </p>
+                    </div>
+                </div>
 
-<!-- Slide 12: Closing (Full Image) -->
-<div class="slide-container full-bg-image" id="slide12" style="background-image: url('http://googleusercontent.com/image_collection/image_retrieval/5451226321117983696');">
-    <div class="content-overlay">
-        <h2>Gå ut och äg dagen.</h2>
-        <p>Vi bygger inte bara integrationer.<br>Vi bygger framtidens sätt att arbeta.</p>
-    </div>
-</div>
+                <div class="flex-1 flex overflow-hidden">
+                    <!-- LEFT SPLIT: REALISTIC ROI CALCULATOR -->
+                    <div class="w-1/2 overflow-y-auto custom-scrollbar p-6 bg-slate-50 border-r border-slate-200">
+                        <div class="max-w-xl mx-auto">
+                            <!-- ROI Calculator Content -->
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-calculator text-indigo-500"></i> ROI Kalkylator</h3>
+                                <span class="text-[10px] bg-white border border-slate-200 px-2 py-1 rounded text-slate-500">Inkl. 45% Overhead</span>
+                            </div>
+                            
+                            <!-- 1. Salary & Employees -->
+                            <div class="mb-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                                <div class="mb-4">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">1. Snittlön (per person)</label>
+                                    <select id="roi-salary-level" onchange="calculateROI()" class="w-full p-3 border border-slate-200 rounded-lg text-sm bg-slate-50 font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
+                                        <option value="43500">Junior / Mindre ort (43 500 kr)</option>
+                                        <option value="55100" selected>Median / Standard (55 100 kr)</option>
+                                        <option value="68000">Senior / Storstad (68 000 kr)</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">2. Antal anställda (som berörs)</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="number" id="roi-employees" value="1" min="1" onchange="calculateROI()" class="w-20 p-3 border border-slate-200 rounded-lg text-sm bg-slate-50 font-bold text-center focus:ring-2 focus:ring-indigo-500 outline-none">
+                                        <span class="text-xs text-slate-400">st personer som sparar tid.</span>
+                                    </div>
+                                </div>
+                                <!-- NEW: Efficiency Slider -->
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <label class="block text-xs font-bold text-slate-500 uppercase">3. Effektivitet (%)</label>
+                                        <span class="text-xs font-bold text-indigo-600" id="roi-efficiency-display">80%</span>
+                                    </div>
+                                    <input type="range" id="roi-efficiency" min="50" max="100" value="80" step="5" oninput="calculateROI()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                                    <p class="text-[10px] text-slate-400 mt-1 italic">Lägre effektivitet = Dyrare arbetstid för bolaget (Högre ROI).</p>
+                                </div>
+                            </div>
 
+                            <div class="mb-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-4">4. ROI Hävstänger</label>
+                                <div class="mb-6 pb-4 border-b border-slate-100">
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-sm font-bold text-slate-700 flex items-center gap-2"><i class="fa-regular fa-clock text-indigo-500"></i> Tidsstöld (per person)</span>
+                                        <span class="text-indigo-600 font-bold" id="roi-hours-display">2 h/dag</span>
+                                    </div>
+                                    <input type="range" id="roi-hours" min="0" max="8" value="2" step="0.5" oninput="calculateROI()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                                    <p class="text-[10px] text-slate-400 mt-1 italic">"Mänskligt lim" mellan system.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <!-- FIX: Added 'event' to toggleLever calls -->
+                                    <div class="lever-card p-3 rounded-lg flex items-start gap-3 cursor-pointer" onclick="toggleLever(event, 'roi-closing')">
+                                        <input type="checkbox" id="roi-closing" onchange="calculateROI()" class="lever-checkbox mt-1">
+                                        <div><span class="block text-sm font-bold text-slate-700">📉 Bokslutspivoten</span><span class="text-xs text-slate-500">Korta bokslutet (5 dagar -> 4h).</span></div>
+                                    </div>
+                                    <div class="lever-card p-3 rounded-lg flex items-start gap-3 cursor-pointer" onclick="toggleLever(event, 'roi-error')">
+                                        <input type="checkbox" id="roi-error" onchange="calculateROI()" class="lever-checkbox mt-1">
+                                        <div><span class="block text-sm font-bold text-slate-700">✅ Felmarginalskostnad</span><span class="text-xs text-slate-500">Minska felaktiga ordrar/fakturor.</span></div>
+                                    </div>
+                                    <div class="lever-card p-3 rounded-lg flex items-start gap-3 cursor-pointer" onclick="toggleLever(event, 'roi-scale')">
+                                        <input type="checkbox" id="roi-scale" onchange="calculateROI()" class="lever-checkbox mt-1">
+                                        <div><span class="block text-sm font-bold text-slate-700">🚀 Skalbarhet</span><span class="text-xs text-slate-500">Undvik nyanställning vid tillväxt.</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-32 h-32 bg-green-500 rounded-full blur-3xl opacity-20 -mr-10 -mt-10"></div>
+                                <div class="relative z-10">
+                                    <p class="text-slate-400 text-xs uppercase font-bold mb-1">Netto Besparing År 1</p>
+                                    <p class="text-3xl font-bold text-green-400" id="res-money">0 kr</p>
+                                    <p class="text-xs text-slate-500 mt-2">*Efter avdrag för startavgift & månadskostnad.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT SPLIT: FULL NEEDS ANALYSIS FORM -->
+                    <div class="w-1/2 overflow-y-auto custom-scrollbar p-6 bg-white">
+                        <div id="behovsanalys-container">
+                            <div id="success-message">
+                                <h3>Tack! 🚀</h3>
+                                <p>Din analys är inskickad. Vi hör av oss inom kort!</p>
+                                <button onclick="location.reload()" class="mt-4 text-blue-600 underline">Starta om</button>
+                            </div>
+
+                            <div id="form-content-wrapper">
+                                <div class="progress-wrapper">
+                                    <div class="progress-bg"><div class="progress-bar" id="progressBar"></div></div>
+                                    <div class="step-indicator">Steg <span id="stepCount">1</span> av 5</div>
+                                </div>
+
+                                <form id="customForm" action="https://hooks.zapier.com/hooks/catch/25909526/ue4p4vt/" method="POST">
+                                    <!-- STEG 1 -->
+                                    <div class="form-step active" data-step="1">
+                                        <h3>Grundläggande Info 🏢</h3>
+                                        <p class="step-desc">För att vi ska förstå din verksamhets storlek och struktur.</p>
+                                        <label>Ditt namn</label>
+                                        <input type="text" name="namn" required placeholder="Förnamn Efternamn" />
+                                        <div class="radio-group" style="margin-bottom:0">
+                                            <div style="flex:1;margin-right:10px">
+                                                <label>Företagsnamn</label>
+                                                <input type="text" name="foretag" required placeholder="Bolaget AB" />
+                                            </div>
+                                            <div style="flex:1">
+                                                <label>Bransch</label>
+                                                <input type="text" name="bransch" required placeholder="T.ex. Retail / Konsult" />
+                                            </div>
+                                        </div>
+                                        <label>Din roll</label>
+                                        <select name="roll" required>
+                                            <option value disabled selected>Välj din roll...</option>
+                                            <option value="VD/Ägare">VD / Grundare / Ägare</option>
+                                            <option value="Marknad/Säljchef">Marknads- / Säljchef</option>
+                                            <option value="Admin/Operations">Admin / Operations</option>
+                                            <option value="Annat">Annat</option>
+                                        </select>
+                                        <label>Antal anställda (Totalt)</label>
+                                        <div class="radio-group">
+                                            <div class="radio-card"><input type="radio" name="anstallda" id="size1" value="1-5" checked /><label for="size1">1-5</label></div>
+                                            <div class="radio-card"><input type="radio" name="anstallda" id="size2" value="6-20" /><label for="size2">6-20</label></div>
+                                            <div class="radio-card"><input type="radio" name="anstallda" id="size3" value="21-50" /><label for="size3">21-50</label></div>
+                                            <div class="radio-card"><input type="radio" name="anstallda" id="size4" value="50+" /><label for="size4">50+</label></div>
+                                        </div>
+                                        <div class="btn-group" style="justify-content:flex-end">
+                                            <button type="button" class="form-btn btn-next">Nästa steg ➔</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- STEG 2 -->
+                                    <div class="form-step" data-step="2">
+                                        <h3>Era System 💻</h3>
+                                        <p class="step-desc">Vilka verktyg använder ni idag?</p>
+                                        <label>E-handelsplattform / Hemsida</label>
+                                        <input type="text" name="system_webb" placeholder="T.ex. Shopify, WooCommerce..." />
+                                        <label>Affärs- &amp; Bokföringssystem</label>
+                                        <input type="text" name="system_erp" placeholder="T.ex. Fortnox, Visma..." />
+                                        <label>CRM / Säljstöd</label>
+                                        <input type="text" name="system_crm" placeholder="T.ex. HubSpot, Pipedrive..." />
+                                        <label>Kommunikation</label>
+                                        <div class="radio-group">
+                                            <div class="radio-card"><input type="radio" name="system_comm" id="comm1" value="Slack" /><label for="comm1">Slack</label></div>
+                                            <div class="radio-card"><input type="radio" name="system_comm" id="comm2" value="Teams" /><label for="comm2">Teams</label></div>
+                                            <div class="radio-card"><input type="radio" name="system_comm" id="comm3" value="Google" /><label for="comm3">Google/Email</label></div>
+                                            <div class="radio-card"><input type="radio" name="system_comm" id="comm4" value="Annat" /><label for="comm4">Annat</label></div>
+                                        </div>
+                                        <div class="btn-group">
+                                            <button type="button" class="form-btn btn-prev">⬅ Tillbaka</button>
+                                            <button type="button" class="form-btn btn-next">Nästa steg ➔</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- STEG 3 -->
+                                    <div class="form-step" data-step="3">
+                                        <h3>Processer &amp; Utmaningar ⚙️</h3>
+                                        <p class="step-desc">Var skaver det mest?</p>
+                                        <label>Primärt mål med automation?</label>
+                                        <select name="goal_primary">
+                                            <option value disabled selected>Vad är viktigast?</option>
+                                            <option value="Spara tid">Spara tid / Minska admin</option>
+                                            <option value="Öka försäljning">Öka försäljning / Konvertering</option>
+                                            <option value="Minska fel">Minska manuella fel</option>
+                                            <option value="Kundnöjdhet">Bättre kundupplevelse</option>
+                                        </select>
+                                        <label>Beskriv manuellt arbete ni gör idag</label>
+                                        <textarea name="process_manual_tasks" rows="3" placeholder="Vi lägger mycket tid på att..."></textarea>
+                                        <label>Uppskattad tid på admin/vecka?</label>
+                                        <div class="radio-group">
+                                            <div class="radio-card"><input type="radio" name="time_waste" id="tw1" value="0-5h" /><label for="tw1">0-5 tim</label></div>
+                                            <div class="radio-card"><input type="radio" name="time_waste" id="tw2" value="5-10h" /><label for="tw2">5-10 tim</label></div>
+                                            <div class="radio-card"><input type="radio" name="time_waste" id="tw3" value="10-20h" /><label for="tw3">10-20 tim</label></div>
+                                            <div class="radio-card"><input type="radio" name="time_waste" id="tw4" value="20h+" /><label for="tw4">20+ tim</label></div>
+                                        </div>
+                                        <label>Order/Transaktionsvolym per månad (ca)</label>
+                                        <input type="text" name="volume" placeholder="T.ex. 50 ordrar/mån" />
+                                        <div class="btn-group">
+                                            <button type="button" class="form-btn btn-prev">⬅ Tillbaka</button>
+                                            <button type="button" class="form-btn btn-next">Nästa steg ➔</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- STEG 4 -->
+                                    <div class="form-step" data-step="4">
+                                        <h3>Kundtjänst &amp; AI 🤖</h3>
+                                        <p class="step-desc">Om ni är intresserade av chatbots/AI-assistenter.</p>
+                                        <label>Hur sker support idag?</label>
+                                        <input type="text" name="support_current" placeholder="T.ex. Mail, telefon, Facebook..." />
+                                        <label>Vanligaste återkommande frågorna?</label>
+                                        <textarea name="support_faq" rows="2" placeholder="T.ex. 'Var är mitt paket?', 'Öppettider'..."></textarea>
+                                        <label>Om ni skaffar en AI-bot, vad ska den göra?</label>
+                                        <select name="bot_goal">
+                                            <option value="Support">Support &amp; Avlastning</option>
+                                            <option value="Sales">Säljstöd &amp; Leads</option>
+                                            <option value="Both">Både och</option>
+                                            <option value="NotInterested">Ej aktuellt just nu</option>
+                                        </select>
+                                        <div class="btn-group">
+                                            <button type="button" class="form-btn btn-prev">⬅ Tillbaka</button>
+                                            <button type="button" class="form-btn btn-next">Sista steget ➔</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- STEG 5 -->
+                                    <div class="form-step" data-step="5">
+                                        <h3>Slutspurten! 🚀</h3>
+                                        <p class="step-desc">Lämna dina kontaktuppgifter.</p>
+                                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+                                            <div>
+                                                <label>Start</label>
+                                                <select name="timeline">
+                                                    <option value="ASAP">Snarast</option>
+                                                    <option value="1 month">1 mån</option>
+                                                    <option value="Q3/Q4">Senare</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label>Budget</label>
+                                                <select name="budget">
+                                                    <option value="Start">Startpaket</option>
+                                                    <option value="Mid">Helhet</option>
+                                                    <option value="Unknown">Vet ej</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <label>Telefonnummer</label>
+                                        <input type="tel" name="telefon" required placeholder="070-123 45 67" />
+                                        <label>Din e-postadress</label>
+                                        <input type="email" name="email" required placeholder="namn@foretag.se" style="border:2px solid #e2e8f0" />
+                                        <label>Önskemål om tid för kontakt?</label>
+                                        <input type="text" name="contact_time" placeholder="T.ex. Tisdag förmiddag" />
+                                        <div class="btn-group">
+                                            <button type="button" class="form-btn btn-prev">⬅ Tillbaka</button>
+                                            <button type="submit" class="form-btn btn-submit">Skicka analys</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: INTERACTIVE SALES SCRIPT FLOW -->
+            <div id="view-presentation" class="phase-view hidden h-full flex flex-col relative">
+                <div class="border-b border-slate-200 px-8 py-4 shrink-0 bg-white shadow-sm flex justify-between items-center">
+                    <h2 class="font-bold text-slate-800 flex items-center gap-2">
+                        <span class="bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span>
+                        Välj Inledning för att starta flödet
+                    </h2>
+                    <div class="flex gap-4 items-center">
+                        <button onclick="showDailyTip()" class="text-xs text-indigo-600 font-bold hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100 transition">💡 Dagens Tips</button>
+                        <button onclick="resetScript()" class="text-xs text-slate-400 hover:text-slate-600"><i class="fa-solid fa-rotate-right"></i> Återställ</button>
+                    </div>
+                </div>
+                
+                <div class="flex-1 flex overflow-hidden">
+                    <!-- LEFT: PITCH SELECTION -->
+                    <div class="w-1/3 bg-slate-50 border-r border-slate-200 overflow-y-auto custom-scrollbar p-6">
+                        <p class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Välj Scenario</p>
+                        <div class="space-y-3">
+                            <button onclick="startFlow('straight')" class="pitch-select-btn w-full text-left p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md transition group">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl group-hover:scale-110 transition">🎯</span>
+                                    <div>
+                                        <span class="block font-bold text-slate-700 text-sm">Raka & Ärliga</span>
+                                        <span class="text-[10px] text-slate-500">Stressade chefer / VD</span>
+                                    </div>
+                                </div>
+                            </button>
+
+                            <button onclick="startFlow('cfo')" class="pitch-select-btn w-full text-left p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md transition group">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl group-hover:scale-110 transition">💰</span>
+                                    <div>
+                                        <span class="block font-bold text-slate-700 text-sm">CFO / Ekonomi</span>
+                                        <span class="text-[10px] text-slate-500">Fokus lönsamhet & bokslut</span>
+                                    </div>
+                                </div>
+                            </button>
+
+                            <button onclick="startFlow('pain')" class="pitch-select-btn w-full text-left p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md transition group">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl group-hover:scale-110 transition">🤕</span>
+                                    <div>
+                                        <span class="block font-bold text-slate-700 text-sm">Smärtan (Operativ)</span>
+                                        <span class="text-[10px] text-slate-500">Säljchefer / Admin</span>
+                                    </div>
+                                </div>
+                            </button>
+
+                            <button onclick="startFlow('scale')" class="pitch-select-btn w-full text-left p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md transition group">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl group-hover:scale-110 transition">📈</span>
+                                    <div>
+                                        <span class="block font-bold text-slate-700 text-sm">Skalbarhet</span>
+                                        <span class="text-[10px] text-slate-500">Gaseller / Startups</span>
+                                    </div>
+                                </div>
+                            </button>
+                            
+                             <button onclick="startFlow('social')" class="pitch-select-btn w-full text-left p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md transition group">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl group-hover:scale-110 transition">🤝</span>
+                                    <div>
+                                        <span class="block font-bold text-slate-700 text-sm">Igenkänning</span>
+                                        <span class="text-[10px] text-slate-500">Vet system (Fortnox/Shopify)</span>
+                                    </div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="startFlow('curious')" class="pitch-select-btn w-full text-left p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md transition group">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl group-hover:scale-110 transition">🤔</span>
+                                    <div>
+                                        <span class="block font-bold text-slate-700 text-sm">Nyfikenhet</span>
+                                        <span class="text-[10px] text-slate-500">Mjuk öppning</span>
+                                    </div>
+                                </div>
+                            </button>
+                            
+                            <button onclick="startFlow('provoke')" class="pitch-select-btn w-full text-left p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-400 hover:shadow-md transition group">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl group-hover:scale-110 transition">🌶️</span>
+                                    <div>
+                                        <span class="block font-bold text-slate-700 text-sm">Provocerande</span>
+                                        <span class="text-[10px] text-slate-500">Våga sticka ut</span>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: INTERACTIVE SCRIPT FLOW -->
+                    <div class="w-2/3 bg-white p-8 overflow-y-auto custom-scrollbar relative" id="script-container">
+                        
+                        <!-- Placeholder State -->
+                        <div id="script-placeholder" class="h-full flex flex-col items-center justify-center text-slate-400 opacity-60">
+                            <i class="fa-solid fa-arrow-left text-4xl mb-4"></i>
+                            <p>Välj en inledning till vänster</p>
+                        </div>
+
+                        <!-- LIVE SCRIPT CONTENT -->
+                        <div id="script-content" class="hidden max-w-2xl mx-auto pb-20">
+                            
+                            <!-- FAS 1: ÖPPNING -->
+                            <div id="step-1" class="script-block active">
+                                <h4 class="text-xs font-bold text-green-600 uppercase mb-2 tracking-wider">🟢 Fas 1: Öppning & Hook</h4>
+                                <div class="bg-green-50 p-6 rounded-2xl border border-green-100 shadow-sm mb-4">
+                                    <p class="text-lg text-slate-800 font-medium whitespace-pre-line leading-relaxed" id="script-opener-text">...</p>
+                                </div>
+                                <button onclick="nextStep(2)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-md transition transform hover:scale-105">
+                                    Kund bekräftar - Gå vidare <i class="fa-solid fa-arrow-down ml-2"></i>
+                                </button>
+                            </div>
+
+                            <!-- FAS 2: FRÅGOR (Dynamisk) -->
+                            <div id="step-2" class="script-block hidden">
+                                <h4 class="text-xs font-bold text-indigo-600 uppercase mb-2 tracking-wider">🟡 Fas 2: Behovsanalys (<span id="track-name">SPÅR X</span>)</h4>
+                                <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 shadow-sm mb-4">
+                                    <p class="text-sm text-indigo-800 font-bold mb-4 border-b border-indigo-200 pb-2">Ställ dessa frågor:</p>
+                                    <ul class="space-y-4" id="script-questions-list">
+                                        <!-- Questions injected here -->
+                                    </ul>
+                                </div>
+                                <button onclick="nextStep(3)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-md transition transform hover:scale-105">
+                                    Fått svar - Gå till Diagnos <i class="fa-solid fa-arrow-down ml-2"></i>
+                                </button>
+                            </div>
+
+                            <!-- FAS 3: DIAGNOS -->
+                            <div id="step-3" class="script-block hidden">
+                                <h4 class="text-xs font-bold text-orange-500 uppercase mb-2 tracking-wider">🟠 Fas 3: Diagnos & Pitch</h4>
+                                <div class="bg-orange-50 p-6 rounded-2xl border border-orange-100 shadow-sm mb-4">
+                                    <p class="text-base text-slate-700 italic leading-relaxed">
+                                        "Tack för att du delar med dig. Baserat på det du säger – att ni lägger tid på <strong>[Nämn problem]</strong> och vill undvika <strong>[Nämn risk]</strong>... så är ni ett skolboksexempel på varför vi finns.<br><br>
+                                        Vi säljer inte ett nytt IT-system. Vi fungerar som en <strong>'Automation as a Service'</strong>. Vi kopplar ihop era befintliga system så att datan flyter automatiskt.<br><br>
+                                        Tänk dig att den där ordern bokförs direkt, eller att säljaren slipper admin-arbetet helt. Vi garanterar driften så ni slipper oroa er för teknikstrul."
+                                    </p>
+                                </div>
+                                <button onclick="nextStep(4)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-md transition transform hover:scale-105">
+                                    Gå på Avslut <i class="fa-solid fa-arrow-down ml-2"></i>
+                                </button>
+                            </div>
+
+                            <!-- FAS 4: AVSLUT -->
+                            <div id="step-4" class="script-block hidden">
+                                <h4 class="text-xs font-bold text-red-500 uppercase mb-2 tracking-wider">🔴 Fas 4: Boka Mötet</h4>
+                                <div class="bg-red-50 p-6 rounded-2xl border border-red-100 shadow-sm mb-4">
+                                    <p class="text-lg text-slate-800 font-bold leading-relaxed">
+                                        "Jag varken kan eller vill lösa hela er struktur på telefon. Men min kollega Adnan är specialist på just [Deras System].<br><br>
+                                        Vi brukar ta en 15-minuters demo där vi visar exakt hur vi löst [Deras Problem] för andra bolag i er bransch.<br><br>
+                                        Om vi kan visa ett sätt att spara de där timmarna vi pratade om – har du möjlighet <span class="text-red-600 bg-red-100 px-1">tisdag förmiddag eller torsdag eftermiddag</span> för att kika på det?"
+                                    </p>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button onclick="setPhase('closing')" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-lg transition transform hover:scale-105 flex items-center gap-2">
+                                        <i class="fa-solid fa-calendar-check"></i> Ja - Boka nu
+                                    </button>
+                                    <button onclick="document.getElementById('quick-counters').classList.remove('hidden')" class="bg-white border border-slate-300 text-slate-600 px-4 py-3 rounded-xl font-bold text-sm hover:bg-slate-50">
+                                        Fick nej? (Invändning)
+                                    </button>
+                                </div>
+                                
+                                <!-- Quick Counters (Hidden by default) -->
+                                <div id="quick-counters" class="hidden mt-6 pt-6 border-t border-slate-200 grid grid-cols-1 gap-2 animate-[fadeIn_0.3s_ease-out]">
+                                    <div class="text-xs font-bold text-slate-400 uppercase mb-2">Räddningsplankor</div>
+                                    <div class="bg-slate-50 p-3 rounded-lg text-sm border border-slate-200">
+                                        <strong class="text-slate-800">"Har IT-kille/Gör själva"</strong><br>
+                                        <span class="text-slate-600 italic">"Kanon! Men vill ni att han ska lägga tid på att underhålla kopplingar eller bygga värde? Vi sköter driften (Ops) så ni slipper avbrott."</span>
+                                    </div>
+                                    <div class="bg-slate-50 p-3 rounded-lg text-sm border border-slate-200">
+                                        <strong class="text-slate-800">"För dyrt"</strong><br>
+                                        <span class="text-slate-600 italic">"Jämfört med mänskliga fel eller en nyanställning är detta en bråkdel. Låt oss räkna på ROI i mötet."</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DAILY TIP MODAL -->
+                <div id="tip-modal" class="hidden absolute inset-0 z-50 flex items-center justify-center p-4">
+                    <div id="tip-content" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200">
+                        <div class="bg-gradient-to-r from-indigo-600 to-blue-500 p-6 text-white flex justify-between items-start">
+                            <div>
+                                <h3 class="text-xl font-bold flex items-center gap-2"><i class="fa-solid fa-sun text-yellow-300"></i> Morgonpeppen</h3>
+                                <p class="text-indigo-100 text-sm mt-1">5 Nycklar för Dagen</p>
+                            </div>
+                            <button onclick="closeTip()" class="text-white/70 hover:text-white text-xl">&times;</button>
+                        </div>
+                        <div class="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                            <div class="space-y-4">
+                                <!-- Static 1 -->
+                                <div class="flex gap-4">
+                                    <div class="bg-indigo-50 text-indigo-600 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">1</div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm">Var en kameleont (Agil & Kreativ)</h4>
+                                        <p class="text-xs text-slate-600 mt-1">Du är inte en robot. Plocka guldkornen från pitcharna och gör dem till dina egna. Sålla bort det onödiga.</p>
+                                    </div>
+                                </div>
+                                <!-- Static 2 -->
+                                <div class="flex gap-4">
+                                    <div class="bg-indigo-50 text-indigo-600 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">2</div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm">Hitta rätt frekvens (Energi)</h4>
+                                        <p class="text-xs text-slate-600 mt-1">Stressad kund? Var lugn (No Bullshit). Nyfiken kund? Höj energin (Skalbarhet). Matcha tonläget.</p>
+                                    </div>
+                                </div>
+                                <!-- Static 3 -->
+                                <div class="flex gap-4">
+                                    <div class="bg-indigo-50 text-indigo-600 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">3</div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm">Tro på det du säljer (Övertygelse)</h4>
+                                        <p class="text-xs text-slate-600 mt-1">Vi löser faktiska problem (Admin-kaos). Du säljer inte en produkt, du säljer en lösning på deras smärta.</p>
+                                    </div>
+                                </div>
+                                <!-- Dynamic 4 -->
+                                <div class="flex gap-4">
+                                    <div class="bg-green-50 text-green-600 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">4</div>
+                                    <div id="dynamic-tip-4">
+                                        <!-- JS populates this -->
+                                    </div>
+                                </div>
+                                <!-- Dynamic 5 -->
+                                <div class="flex gap-4">
+                                    <div class="bg-green-50 text-green-600 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">5</div>
+                                    <div id="dynamic-tip-5">
+                                        <!-- JS populates this -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-4 text-center border-t border-slate-100">
+                            <button onclick="closeTip()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-indigo-700 transition">Nu kör vi! 🚀</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VIEW 3: OBJECTIONS & ARSENAL (20 QUESTIONS) -->
+            <div id="view-objection" class="phase-view hidden h-full flex flex-col p-8 overflow-y-auto custom-scrollbar">
+                <div class="flex gap-8 h-full">
+                    <!-- LEFT: OBJECTIONS -->
+                    <div class="w-1/2 flex flex-col">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-indigo-500"></i> Invändningar (Motstånd)</h3>
+                        <div class="relative mb-4">
+                            <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i>
+                            <input type="text" id="objSearch" placeholder="Sök motargument..." class="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 shadow-sm outline-none transition focus:border-indigo-500 text-sm">
+                        </div>
+                        <div id="objections-list" class="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-2"></div>
+                    </div>
+
+                    <!-- RIGHT: ARSENAL (20 QUESTIONS) -->
+                    <div class="w-1/2 flex flex-col">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-clipboard-question text-green-500"></i> Arsenalen (20 Frågor)</h3>
+                        <div id="arsenal-list" class="flex-1 overflow-y-auto custom-scrollbar space-y-4 pr-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: CLOSING (CALENDLY) -->
+            <div id="view-closing" class="phase-view hidden h-full flex flex-col p-8 overflow-y-auto custom-scrollbar items-center">
+                <h3 class="text-2xl font-bold text-slate-700 mb-6">Boka in kunden</h3>
+                <div class="calendly-inline-widget" data-url="https://calendly.com/samify-info/30min" style="min-width:320px;height:700px;width:100%;"></div>
+                <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+            </div>
+
+        </main>
+
+        <!-- COLUMN 2: AI & VALUE (Right - 25% Width) -->
+        <aside class="w-1/4 min-w-[350px] bg-white border-l border-slate-200 flex flex-col shrink-0 shadow-xl z-20 relative">
+             <div class="h-[80%] w-full relative bg-slate-50 border-b border-slate-200 flex flex-col">
+                 <div class="p-3 bg-white border-b border-slate-100 flex justify-between items-center shrink-0 h-12">
+                    <h3 class="font-bold text-slate-700 text-sm flex items-center gap-2"><div class="w-2 h-2 bg-indigo-600 rounded-full"></div> Samify AI</h3>
+                    <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">ONLINE</span>
+                 </div>
+                 <div class="flex-1 relative">
+                     <zapier-interfaces-chatbot-embed is-popup='false' chatbot-id='cml9x572t0029ibz47krur5g7' height='100%' width='100%' class="absolute inset-0 w-full h-full"></zapier-interfaces-chatbot-embed>
+                 </div>
+            </div>
+            <div class="h-[20%] bg-slate-900 text-white p-6 relative overflow-hidden flex flex-col justify-center">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-600 rounded-full blur-3xl opacity-20 -mr-10 -mt-10"></div>
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-10px text-slate-400 uppercase font-bold tracking-widest">Netto Besparing (År 1)</span>
+                        <i class="fa-solid fa-calculator text-green-400"></i>
+                    </div>
+                    <div class="text-3xl font-extrabold tracking-tight text-white mb-1" id="right-roi-value">0 kr</div>
+                    <div class="text-xs text-slate-400">med AutoFlow™</div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // --- SCRIPT DATA ---
+        
+        // Definition of specific Question Tracks
+        const tracks = {
+            A: { name: "Operativ / Säljchef", qs: [
+                "1. Kan du beskriva resan för en kundorder från webshop till bokfört verifikat?",
+                "2. Hur mycket tid lägger säljteamet på admin jämfört med att stänga affärer?",
+                "4. Vilka uppgifter är så monotona att ni skäms över att låta en människa göra dem?",
+                "5. Om din admin-person var sjuk i två veckor, vad skulle stanna av helt?"
+            ]},
+            B: { name: "Ekonomi / CFO", qs: [
+                "3. När ni stänger i CRM:et, hur hamnar datan i ekonomisystemet idag?",
+                "6. Hur många dagar tar ert månadsbokslut och vad tar mest tid?",
+                "7. Hur matchar ni inbetalningar på banken med ordernummer idag?",
+                "8. Vad kostar det i tid/pengar när en faktura blir fel p.g.a. mänskliga faktorn?"
+            ]},
+            C: { name: "Skalbarhet / Grundare", qs: [
+                "11. Om ni dubblar volymen nästa kvartal, hur många nyanställningar krävs?",
+                "14. Hur mycket 'Shadow IT' (egna Excel-lösningar) har ni i organisationen?",
+                "13. Vad hindrar er från att ta in 20% fler kunder med nuvarande personalstyrka?",
+                "15. Hur planerar ni att använda AI för att vinna mot era konkurrenter?"
+            ]},
+            D: { name: "Service / Support", qs: [
+                "16. I hur många system måste personalen leta för att svara på en kundfråga?",
+                "19. Vilka är de 3 vanligaste frågorna som egentligen är rena 'robot-svar'?",
+                "17. Hur mycket tid läggs på att manuellt skicka ut kollinummer?",
+                "18. Hur skulle kundupplevelsen ändras om all historik fanns framme direkt?"
+            ]}
+        };
+
+        // Pitches mapped to Tracks (UPDATED COPY)
+        const pitches = {
+            straight: { 
+                title: "Raka & Ärliga", 
+                text: "Hej [Namn], X från Samify. Jag ska vara helt rak: Jag letar efter bolag som fastnat i 'App-fällan' – alltså där ni har moderna system, men tvingas agera manuell länk emellan dem.\n\nÄr det en flaskhals ni känner igen er i, eller flyter datan av sig självt hos er?",
+                track: "A"
+            },
+            cfo: { 
+                title: "CFO / Ekonomi", 
+                text: "Hej [Namn], kort fråga från Samify:\n\nNär ni stänger böckerna vid månadsskiftet – litar ni på siffrorna direkt, eller krävs det dagar av detektivarbete och manuell matchning för att allt ska stämma?",
+                track: "B"
+            },
+            pain: { 
+                title: "Smärtan (Operativ)", 
+                text: "Hej [Namn], X från Samify. Vi hjälper bolag att ta bort de där repetitiva uppgifterna som dödar säljmoralen.\n\nEn klassiker vi ser är att säljare lägger 20% av sin tid på att knappa in ordrar i affärssystemet istället för att dra in nya affärer. Hur ser den fördelningen ut hos er – får säljarna sälja eller måste de administrera?",
+                track: "A"
+            },
+            scale: { 
+                title: "Skalbarhet", 
+                text: "Hej [Namn], jag ser att ni växer så det knakar!\n\nMånga i er fas upptäcker tyvärr att admin-kostnaden äter upp marginalen när volymen ökar. Har ni riggat systemen för att hantera dubbla omsättningen nästa år, eller måste ni 'kasta in mer folk' för att lösa det?",
+                track: "C"
+            },
+            social: { 
+                title: "Igenkänning", 
+                text: "Hej [Namn], anledningen till att jag ringer är att vi hjälper flera bolag som kör just [Fortnox/Shopify].\n\nMånga av dem hade grym koll på försäljningen, men slet med att bokföringen alltid släpade efter på grund av manuell handpåläggning. Är det där en utmaning du känner igen, eller har ni automatiserat kopplingen helt?",
+                track: "A"
+            },
+            curious: { 
+                title: "Nyfikenhet", 
+                text: "Hej [Namn], jag ringer från Samify. Vi gör en scanning av hur bolag i [Bransch] hanterar sina dataflöden.\n\nMånga vi pratar med har system som är bra var för sig, men som inte riktigt 'pratar med varandra'. Är det en nöt ni har knäckt, eller ligger det på bordet att lösa framöver?",
+                track: "D"
+            },
+            provoke: { 
+                title: "Provocerande", 
+                text: "Hej [Namn], X från Samify här. Jag har en lite annorlunda fråga för att kolla hur sårbara era processer är:\n\nOm er bästa administratör blir sjukskriven imorgon – stannar era viktigaste flöden av då, eller rullar systemen vidare av sig själva?",
+                track: "A"
+            }
+        };
+
+        const objections = [
+            { cat: "A", trig: "1. Zapier är amerikanskt. GDPR?", resp: "Jag förstår oron helt, det är en kritisk fråga för alla svenska bolag idag. Det är viktigt att skilja på lagring och processering. Zapier har certifierat sig enligt Data Privacy Framework (DPF) och använder Standard Contractual Clauses (SCCs) vilket ger en laglig grund för överföringen. Men för att vara extra säkra kan vi designa era flöden med principen om dataminimering." },
+            { cat: "A", trig: "2. Vi tillåter inte tredjepartsåtkomst", resp: "Det är en klok policy. Men paradoxalt nog är manuell datahantering ofta en större säkerhetsrisk. När vi integrerar via API använder vi 'Scoped Access' – det innebär att vi ger automationen en nyckel som bara kan göra exakt det den ska (t.ex. 'Skapa Faktura') och inget annat. Den kan inte läsa era löner eller se era bankkonton." },
+            { cat: "B", trig: "6. Unika och komplexa processer", resp: "Det är faktiskt det bästa argumentet för automation. 'Unik' betyder ofta bara att den följer specifika regler. Om ni kan skriva ner reglerna (t.ex. 'Om ordern är över 10 000 kr, mejla chefen'), så är det inte komplext för en dator – det är bara logik." },
+            { cat: "B", trig: "7. Testat själva, slutade fungera", resp: "DIY-automation är skört. När personen som byggde det slutar, eller när ett API uppdateras, faller allt. Det är precis därför Samify finns som en tjänst. Ni köper inte bara bygget, ni köper 'Drift'. Vi övervakar flödena dygnet runt." },
+            { cat: "C", trig: "11. Det är för dyrt (Har personal)", resp: "Låt oss räkna på alternativkostnaden. Om din säljadministratör lägger 2 timmar om dagen på att flytta data, är det ca 40 timmar i månaden. Med sociala avgifter och overhead kostar det er antagligen runt 20 000 - 30 000 kr i månaden i ren 'copy-paste'-tid." },
+            { cat: "C", trig: "13. Vi kan göra det internt", resp: "Er IT-person är värdefull. Vill ni att hen ska lägga 10 timmar i veckan på att felsöka en webhook, eller ska hen fokusera på er kärnverksamhet? Intern automation blir ofta 'Shadow IT' – oövervakad och odokumenterad." }
+        ];
+
+        const arsenalQuestions = [
+            { cat: "Operativ Tid", q: "1. Kan du beskriva resan för en kundorder från webshop till bokfört verifikat?" },
+            { cat: "Operativ Tid", q: "2. Hur mycket tid lägger säljteamet på admin jämfört med att stänga affärer?" },
+            { cat: "Ekonomi/CFO", q: "6. Hur många dagar tar ert månadsbokslut och vad tar mest tid?" },
+            { cat: "Ekonomi/CFO", q: "7. Hur matchar ni inbetalningar på banken med ordernummer idag?" },
+            { cat: "Skalbarhet", q: "11. Om ni dubblar volymen nästa kvartal, hur många nyanställningar krävs?" },
+            { cat: "Service/Support", q: "16. I hur många system måste personalen leta för att svara på en kundfråga?" }
+        ];
+
+        // --- DAILY TIPS LOGIC ---
+        const tipPool4 = [
+            { title: "Detektiven (Nyfikenhet)", text: "En bra säljare antar ingenting. 'Bra säljare snokar'. Ställ frågor som gräver djupare. Använd NOHRA-modellen: Vad är Nuläget? Vad är Hindret? Hitta smärtan." },
+            { title: "Våga Tystnaden (Aktivt lyssnande)", text: "Prata inte sönder affären. Ställ din fråga och var sedan tyst. Låt kunden tänka. Det är i tystnaden den viktiga informationen kommer fram." },
+            { title: "Sälj Tidsmaskinen (Känsla)", text: "Don Draper sålde inte en projektor, han sålde en tidsmaskin. Sälj inte 'API-kopplingar'. Sälj känslan av att gå hem kl 17 en fredag och veta att allt stämmer." },
+            { title: "It's Toasted (Äg processen)", text: "Alla cigaretter rostades, men Lucky Strike sa det högt. Har konkurrenter också integrationer? So what? Berätta om ER process och trygghet som om den vore unik." }
+        ];
+        
+        const tipPool5 = [
+            { title: "Tinder-regeln (Avslut)", text: "Gör inte en 'Tinder-fail'. Har ni bra kemi? Våga fråga om affären! Få ett ja, ett nej, eller en tydlig plan. Allt annat är slöseri." },
+            { title: "Suck it up (Ägarskap)", text: "Dyker hinder upp? Skyll inte ifrån dig. Fråga kunden: 'Finns det några hinder?'. Får du ett jobbigt svar? Suck it up. Lös det." },
+            { title: "Katedralbyggaren (Vision)", text: "Staplar du sten eller bygger du en katedral? Se dagens samtal som en del av att bygga din och bolagets framgång, inte bara ett 'måste'." },
+            { title: "Byt Samtalsämne (Reframing)", text: "'If you don't like what's being said, change the conversation.' Fastnar kunden i budget? Byt till risk. 'Har ni råd att tappa data?'. Ta kommandot." },
+            { title: "Heinz-effekten (Visualisering)", text: "Don sålde ketchup utan att visa flaskan. Tvinga kunden att tänka 'Heinz'. Ställ frågor som får dem att se lösningen själva. 'Hur skulle din vecka se ut om du slapp detta?'" }
+        ];
+
+        function showDailyTip() {
+            const day = new Date().getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+            
+            // Logic for rotation (Mon-Fri)
+            let t4, t5;
+            
+            // Map days to specific combos to ensure variation
+            switch(day) {
+                case 1: // Mon
+                    t4 = tipPool4[0]; t5 = tipPool5[0]; break;
+                case 2: // Tue
+                    t4 = tipPool4[1]; t5 = tipPool5[1]; break;
+                case 3: // Wed
+                    t4 = tipPool4[2]; t5 = tipPool5[2]; break; // New Mad Men tips here
+                case 4: // Thu
+                    t4 = tipPool4[3]; t5 = tipPool5[3]; break; // And here
+                case 5: // Fri
+                    t4 = tipPool4[0]; t5 = tipPool5[4]; break; // Wrap around for pool 4
+                default: // Weekend (Default to Mon)
+                    t4 = tipPool4[0]; t5 = tipPool5[0];
+            }
+
+            document.getElementById('dynamic-tip-4').innerHTML = `<h4 class="font-bold text-slate-800 text-sm">${t4.title}</h4><p class="text-xs text-slate-600 mt-1">${t4.text}</p>`;
+            document.getElementById('dynamic-tip-5').innerHTML = `<h4 class="font-bold text-slate-800 text-sm">${t5.title}</h4><p class="text-xs text-slate-600 mt-1">${t5.text}</p>`;
+            
+            document.getElementById('tip-modal').classList.remove('hidden');
+        }
+
+        function closeTip() {
+            document.getElementById('tip-modal').classList.add('hidden');
+        }
+
+        // --- SCRIPT LOGIC ---
+        function startFlow(pitchKey) {
+            const pitch = pitches[pitchKey];
+            const track = tracks[pitch.track];
+
+            document.getElementById('script-placeholder').classList.add('hidden');
+            document.getElementById('script-content').classList.remove('hidden');
+
+            // Set Phase 1
+            document.getElementById('script-opener-text').innerText = pitch.text;
+
+            // Set Phase 2 (Questions)
+            document.getElementById('track-name').innerText = track.name;
+            const qList = document.getElementById('script-questions-list');
+            qList.innerHTML = "";
+            track.qs.forEach(q => {
+                qList.innerHTML += `<li class="flex items-start gap-3"><input type="checkbox" class="mt-1 w-4 h-4 accent-indigo-600"><span class="text-slate-700 font-medium">${q}</span></li>`;
+            });
+
+            // Reset Steps
+            resetSteps();
+            
+            // Highlight active button
+            document.querySelectorAll('.pitch-select-btn').forEach(b => {
+                b.classList.remove('ring-2', 'ring-indigo-500', 'bg-indigo-50');
+                if(b.onclick.toString().includes(`'${pitchKey}'`)) {
+                    b.classList.add('ring-2', 'ring-indigo-500', 'bg-indigo-50');
+                }
+            });
+        }
+
+        function resetSteps() {
+            document.getElementById('step-1').classList.add('active');
+            document.getElementById('step-2').classList.remove('active', 'hidden');
+            document.getElementById('step-2').classList.add('hidden');
+            document.getElementById('step-3').classList.remove('active', 'hidden');
+            document.getElementById('step-3').classList.add('hidden');
+            document.getElementById('step-4').classList.remove('active', 'hidden');
+            document.getElementById('step-4').classList.add('hidden');
+            document.getElementById('quick-counters').classList.add('hidden');
+        }
+
+        function nextStep(stepNum) {
+            const step = document.getElementById(`step-${stepNum}`);
+            step.classList.remove('hidden');
+            setTimeout(() => step.classList.add('active'), 10);
+            step.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function resetScript() {
+            document.getElementById('script-content').classList.add('hidden');
+            document.getElementById('script-placeholder').classList.remove('hidden');
+            document.querySelectorAll('.pitch-select-btn').forEach(b => b.classList.remove('ring-2', 'ring-indigo-500', 'bg-indigo-50'));
+        }
+
+        // --- FORM LOGIC ---
+        function initMultiStepForm() {
+            const form = document.getElementById('customForm');
+            if(!form) return;
+
+            const steps = form.querySelectorAll('.form-step');
+            const nextBtns = form.querySelectorAll('.btn-next');
+            const prevBtns = form.querySelectorAll('.btn-prev');
+            const progressBar = document.getElementById('progressBar');
+            const stepCountSpan = document.getElementById('stepCount');
+            const submitBtn = form.querySelector('.btn-submit');
+            const formWrapper = document.getElementById('form-content-wrapper');
+            const successMessage = document.getElementById('success-message');
+            
+            let currentStep = 0;
+
+            function updateForm() {
+                steps.forEach((step, index) => {
+                    step.classList.toggle('active', index === currentStep);
+                });
+                
+                if(steps.length > 0 && progressBar) {
+                    const progress = ((currentStep + 1) / steps.length) * 100;
+                    progressBar.style.width = progress + '%';
+                }
+                if(stepCountSpan) stepCountSpan.textContent = currentStep + 1;
+                
+                // Scroll to top of form
+                document.getElementById('behovsanalys-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            nextBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const currentStepEl = steps[currentStep];
+                    const inputs = currentStepEl.querySelectorAll('input, select, textarea');
+                    let stepIsValid = true;
+                    
+                    for (const input of inputs) {
+                        if (!input.checkValidity()) {
+                            stepIsValid = false;
+                            input.reportValidity();
+                            break; 
+                        }
+                    }
+
+                    if (stepIsValid && currentStep < steps.length - 1) {
+                        currentStep++;
+                        updateForm();
+                    }
+                });
+            });
+
+            prevBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (currentStep > 0) {
+                        currentStep--;
+                        updateForm();
+                    }
+                });
+            });
+
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault(); 
+                const originalBtnText = submitBtn.innerText;
+                submitBtn.innerText = "Skickar...";
+                submitBtn.disabled = true;
+
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                
+                try {
+                    // Send to Zapier
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: JSON.stringify(data),
+                    });
+
+                    if (response.ok) {
+                        if(formWrapper) formWrapper.style.display = 'none';
+                        if(successMessage) successMessage.style.display = 'block';
+                    } else {
+                        alert("Något gick fel vid inskickningen. Försök igen!");
+                        submitBtn.innerText = originalBtnText;
+                        submitBtn.disabled = false;
+                    }
+                } catch (error) {
+                    alert("Ett nätverksfel uppstod. Kontrollera din anslutning.");
+                    submitBtn.innerText = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            });
+
+            updateForm();
+        }
+
+        // --- COMMON LOGIC ---
+        window.onload = () => {
+            renderObjections();
+            renderArsenal();
+            calculateROI();
+            initMultiStepForm();
+        };
+
+        // Track if tips have been shown this session
+        let tipsShown = false;
+
+        function setPhase(phase) {
+            document.querySelectorAll('.phase-btn').forEach(b => {
+                b.classList.remove('active', 'bg-white', 'text-indigo-900', 'shadow-sm');
+                b.classList.add('text-indigo-100', 'hover:bg-white/10');
+            });
+            document.getElementById('btn-' + phase).classList.add('active', 'bg-white', 'text-indigo-900', 'shadow-sm');
+            document.getElementById('btn-' + phase).classList.remove('text-indigo-100', 'hover:bg-white/10');
+            
+            document.querySelectorAll('.phase-view').forEach(v => v.classList.add('hidden'));
+            document.getElementById('view-' + phase).classList.remove('hidden');
+
+            // Show tips automatically only once when entering Presentation
+            if(phase === 'presentation' && !tipsShown) {
+                showDailyTip();
+                tipsShown = true;
+            }
+        }
+
+        function calculateROI() {
+            const salary = parseInt(document.getElementById('roi-salary-level').value);
+            const hoursPerDay = parseFloat(document.getElementById('roi-hours').value);
+            const employeeCount = parseInt(document.getElementById('roi-employees').value) || 1;
+            
+            // FIX: Get efficiency value
+            const efficiency = parseInt(document.getElementById('roi-efficiency').value);
+            // Update display text
+            document.getElementById('roi-efficiency-display').innerText = efficiency + "%";
+
+            const packageCost = 15000;
+            const startFee = 7995;
+            
+            const hourlyCost = salary / 160; 
+            
+            // FIX: Calculate multiplier. 
+            // 80% efficiency means the cost to get 100% output is higher. 
+            // Formula: Cost / (Efficiency/100)
+            const efficiencyMultiplier = 1 / (efficiency / 100);
+
+            const dailyCost = (hourlyCost * hoursPerDay * employeeCount) * efficiencyMultiplier; 
+            const annualSavings = dailyCost * 21 * 11; 
+
+            let softValue = 0;
+            if(document.getElementById('roi-closing')?.checked) softValue += 20000; 
+            if(document.getElementById('roi-scale')?.checked) softValue += 50000; 
+            
+            const totalGrossSavings = annualSavings + softValue;
+            const netFirstYear = totalGrossSavings - ((packageCost * 12) + startFee);
+
+            document.getElementById('roi-hours-display').innerText = hoursPerDay + " h/dag";
+            
+            const moneyStr = Math.round(netFirstYear).toLocaleString() + " kr";
+            document.getElementById('res-money').innerText = moneyStr;
+            document.getElementById('right-roi-value').innerText = moneyStr; 
+        }
+
+        // FIX: Updated Toggle Function to handle click events correctly
+        function toggleLever(e, id) {
+            const checkbox = document.getElementById(id);
+            
+            // Check if the click target is the checkbox itself.
+            // If it IS the checkbox, the browser toggles it automatically.
+            // If it is NOT the checkbox (it's the div), we toggle it manually.
+            if (e.target !== checkbox) {
+                checkbox.checked = !checkbox.checked;
+            }
+            
+            // Update visual state
+            checkbox.parentElement.classList.toggle('active', checkbox.checked);
+            
+            // Recalculate ROI
+            calculateROI();
+        }
+
+        function toggleObjection(idx) {
+            const el = document.getElementById('ans-' + idx);
+            const icon = document.getElementById('icon-' + idx);
+            el.classList.toggle('open');
+            icon.classList.toggle('rotate-180');
+        }
+
+        function renderObjections(filter = "") {
+            const list = document.getElementById('objections-list');
+            list.innerHTML = "";
+            objections.filter(o => o.trig.toLowerCase().includes(filter.toLowerCase())).forEach((obj, idx) => {
+                let badgeColor = obj.cat === "A" ? "bg-red-100 text-red-600" : (obj.cat === "B" ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600");
+                list.innerHTML += `
+                    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition group">
+                        <button onclick="toggleObjection(${idx})" class="w-full text-left p-4 font-bold text-slate-700 hover:text-indigo-600 flex justify-between items-center gap-2">
+                            <span class="flex items-center gap-2"><span class="text-[10px] font-bold px-2 py-0.5 rounded ${badgeColor}">KAT ${obj.cat}</span>${obj.trig}</span>
+                            <i id="icon-${idx}" class="fa-solid fa-chevron-down text-xs text-slate-300 transition-transform duration-300"></i>
+                        </button>
+                        <div id="ans-${idx}" class="objection-content bg-slate-50"><p class="p-6 border-t border-slate-200 text-slate-600 leading-relaxed text-sm whitespace-pre-line">${obj.resp}</p></div>
+                    </div>`;
+            });
+        }
+        
+        function renderArsenal() {
+            const list = document.getElementById('arsenal-list');
+            list.innerHTML = "";
+            arsenalQuestions.forEach((item) => {
+                let catColor = item.cat.includes("Ekonomi") ? "text-green-500" : "text-indigo-400";
+                list.innerHTML += `<div class="bg-white p-4 rounded-lg border border-slate-100 shadow-sm text-sm"><span class="text-[10px] font-bold ${catColor} uppercase tracking-wider mb-1 block">${item.cat}</span><p class="text-slate-700 font-medium">"${item.q}"</p></div>`;
+            });
+        }
+        document.getElementById('objSearch').addEventListener('input', (e) => renderObjections(e.target.value));
+    </script>
 </body>
 </html>
-```
