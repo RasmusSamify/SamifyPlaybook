@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Samify Sales Dashboard V19 - Efficiency & Fixes</title>
+    <title>Samify Sales Dashboard V20 - New Structure</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -39,13 +39,6 @@
             color: #312e81; /* Indigo-900 */
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             transform: translateY(-1px);
-        }
-
-        /* Tabs */
-        .sub-tab.active {
-            border-bottom: 2px solid #4f46e5;
-            color: #4f46e5;
-            background-color: #eef2ff;
         }
 
         /* ROI Toggle Switch */
@@ -85,6 +78,21 @@
             animation: slideIn 0.3s ease-out;
         }
         @keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Dashboard Styles (Adapted from provided script) */
+        .dash-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; max-width: 500px; margin-left: auto; margin-right: auto; border: 1px solid #e2e8f0; }
+        .dash-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .dash-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.15); }
+        .dash-btn:active { transform: scale(0.98); }
+        .dash-btn-bra { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+        .dash-btn-mellan { background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); color: white; }
+        .dash-btn-dalig { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        
+        .dash-stat-box { background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; }
+        .dash-stat-value { font-size: 28px; font-weight: 800; color: #1e293b; line-height: 1; }
+        .dash-stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-top: 5px; }
+        .dash-big-stat { background-color: #eff6ff; border: 1px solid #dbeafe; }
+        .dash-big-stat .dash-stat-value { color: #2563eb; }
 
         /* Form Styles (Scoped) */
         #behovsanalys-container { background: #ffffff; color: #1e293b; position: relative; }
@@ -126,24 +134,32 @@
                 <h1 class="font-bold text-lg tracking-tight leading-none">Samify <span class="font-light opacity-70">OS</span></h1>
                 <div class="flex items-center gap-2 text-[10px] text-indigo-200 mt-1">
                     <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-                    Sales Playbook V19
+                    Sales Playbook V20
                 </div>
             </div>
         </div>
 
         <!-- Navigation -->
         <div class="flex gap-2 bg-black/20 p-1 rounded-xl border border-white/5">
-            <button onclick="setPhase('discovery')" id="btn-discovery" class="phase-btn active px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
-                <i class="fa-solid fa-calculator"></i> 1. Upptäck & ROI
+            <!-- 1. Dashboard -->
+            <button onclick="setPhase('dashboard')" id="btn-dashboard" class="phase-btn active px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2">
+                <i class="fa-solid fa-chart-line"></i> 1. Dashboard
             </button>
+            <!-- 2. Säljmanus -->
             <button onclick="setPhase('presentation')" id="btn-presentation" class="phase-btn px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 text-indigo-100 hover:bg-white/10">
-                <i class="fa-solid fa-microphone-lines"></i> 2. Säljmanus (Live)
+                <i class="fa-solid fa-microphone-lines"></i> 2. Säljmanus
             </button>
+            <!-- 3. Hantera -->
             <button onclick="setPhase('objection')" id="btn-objection" class="phase-btn px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 text-indigo-100 hover:bg-white/10">
                 <i class="fa-solid fa-shield-halved"></i> 3. Hantera
             </button>
+            <!-- 4. Upptäck & ROI (Moved) -->
+            <button onclick="setPhase('discovery')" id="btn-discovery" class="phase-btn px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 text-indigo-100 hover:bg-white/10">
+                <i class="fa-solid fa-calculator"></i> 4. Upptäck & ROI
+            </button>
+            <!-- 5. Stäng -->
             <button onclick="setPhase('closing')" id="btn-closing" class="phase-btn px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 text-indigo-100 hover:bg-white/10">
-                <i class="fa-solid fa-check"></i> 4. Stäng
+                <i class="fa-solid fa-check"></i> 5. Stäng
             </button>
         </div>
 
@@ -160,255 +176,57 @@
         <!-- COLUMN 1: ARBETSYTA (75%) -->
         <main class="w-3/4 flex flex-col border-r border-slate-200 relative overflow-hidden bg-white">
             
-            <!-- VIEW 1: DISCOVERY & ROI -->
-            <div id="view-discovery" class="phase-view h-full flex flex-col overflow-hidden">
-                <div class="bg-indigo-50 border-b border-indigo-100 px-8 py-4 shrink-0 flex justify-between items-center">
-                    <div>
-                        <h2 class="text-xl font-bold text-indigo-900"><i class="fa-solid fa-magnifying-glass mr-2"></i>Steg 1: Analysera & Kalkylera</h2>
-                        <p class="text-sm text-indigo-600 font-medium tracking-tight">
-                            <span class="font-bold">Agila:</span> Vi anpassar oss • <span class="font-bold">Tro:</span> Vi tror stenhårt på det vi gör • <span class="font-bold">Frekvens:</span> Affärer leder till affärer - högt tempo!
-                        </p>
+            <!-- VIEW 1: DASHBOARD (New Integration) -->
+            <div id="view-dashboard" class="phase-view h-full flex flex-col overflow-y-auto custom-scrollbar p-8 bg-slate-50">
+                <div class="max-w-2xl mx-auto w-full">
+                    
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">📞 Säljpanel & Statistik</h2>
+
+                    <!-- User Selector -->
+                    <div class="dash-card">
+                        <h3 class="text-sm font-bold text-slate-500 uppercase mb-3 tracking-wider">Vem loggar?</h3>
+                        <select id="currentUser" class="w-full p-3 border-2 border-indigo-200 rounded-lg text-base font-bold text-indigo-900 bg-indigo-50 focus:border-indigo-500 focus:outline-none transition">
+                            <option value="" disabled selected>Välj ditt namn...</option>
+                            <option value="Adrian Kålback">Adrian Kålback</option>
+                            <option value="Emil Mässing">Emil Mässing</option>
+                            <option value="Lawand Nasro">Lawand Nasro</option>
+                            <option value="Malin Karlsson">Malin Karlsson</option>
+                        </select>
                     </div>
-                </div>
 
-                <div class="flex-1 flex overflow-hidden">
-                    <!-- LEFT SPLIT: REALISTIC ROI CALCULATOR -->
-                    <div class="w-1/2 overflow-y-auto custom-scrollbar p-6 bg-slate-50 border-r border-slate-200">
-                        <div class="max-w-xl mx-auto">
-                            <!-- ROI Calculator Content -->
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-calculator text-indigo-500"></i> ROI Kalkylator</h3>
-                                <span class="text-[10px] bg-white border border-slate-200 px-2 py-1 rounded text-slate-500">Inkl. 45% Overhead</span>
-                            </div>
-                            
-                            <!-- 1. Salary & Employees -->
-                            <div class="mb-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                                <div class="mb-4">
-                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">1. Snittlön (per person)</label>
-                                    <select id="roi-salary-level" onchange="calculateROI()" class="w-full p-3 border border-slate-200 rounded-lg text-sm bg-slate-50 font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
-                                        <option value="43500">Junior / Mindre ort (43 500 kr)</option>
-                                        <option value="55100" selected>Median / Standard (55 100 kr)</option>
-                                        <option value="68000">Senior / Storstad (68 000 kr)</option>
-                                    </select>
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">2. Antal anställda (som berörs)</label>
-                                    <div class="flex items-center gap-3">
-                                        <input type="number" id="roi-employees" value="1" min="1" onchange="calculateROI()" class="w-20 p-3 border border-slate-200 rounded-lg text-sm bg-slate-50 font-bold text-center focus:ring-2 focus:ring-indigo-500 outline-none">
-                                        <span class="text-xs text-slate-400">st personer som sparar tid.</span>
-                                    </div>
-                                </div>
-                                <!-- NEW: Efficiency Slider -->
-                                <div>
-                                    <div class="flex justify-between mb-2">
-                                        <label class="block text-xs font-bold text-slate-500 uppercase">3. Effektivitet (%)</label>
-                                        <span class="text-xs font-bold text-indigo-600" id="roi-efficiency-display">80%</span>
-                                    </div>
-                                    <input type="range" id="roi-efficiency" min="50" max="100" value="80" step="5" oninput="calculateROI()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
-                                    <p class="text-[10px] text-slate-400 mt-1 italic">Lägre effektivitet = Dyrare arbetstid för bolaget (Högre ROI).</p>
-                                </div>
-                            </div>
+                    <!-- Call Logger -->
+                    <div class="dash-card">
+                        <h3 class="text-sm font-bold text-slate-500 uppercase mb-3 tracking-wider">Logga Nytt Samtal</h3>
+                        <input type="text" id="foretagInput" class="w-full p-3 border border-slate-300 rounded-lg text-base mb-4 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none" placeholder="Företagets namn..." autofocus>
+                        
+                        <div class="space-y-2">
+                            <button class="dash-btn dash-btn-bra" onclick="logga('Bra')"><i class="fa-solid fa-check"></i> ✅ Bra (Sälj/Boka)</button>
+                            <button class="dash-btn dash-btn-mellan" onclick="logga('Mellan')"><i class="fa-solid fa-question"></i> 🤔 Mellan</button>
+                            <button class="dash-btn dash-btn-dalig" onclick="logga('Dåligt')"><i class="fa-solid fa-xmark"></i> ❌ Dåligt / Inget svar</button>
+                        </div>
+                        
+                        <div id="error-box" class="hidden mt-3 bg-red-100 text-red-700 p-3 rounded-lg text-sm border border-red-200"></div>
+                    </div>
 
-                            <div class="mb-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                                <label class="block text-xs font-bold text-slate-500 uppercase mb-4">4. ROI Hävstänger</label>
-                                <div class="mb-6 pb-4 border-b border-slate-100">
-                                    <div class="flex justify-between mb-2">
-                                        <span class="text-sm font-bold text-slate-700 flex items-center gap-2"><i class="fa-regular fa-clock text-indigo-500"></i> Tidsstöld (per person)</span>
-                                        <span class="text-indigo-600 font-bold" id="roi-hours-display">2 h/dag</span>
-                                    </div>
-                                    <input type="range" id="roi-hours" min="0" max="8" value="2" step="0.5" oninput="calculateROI()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
-                                    <p class="text-[10px] text-slate-400 mt-1 italic">"Mänskligt lim" mellan system.</p>
-                                </div>
-                                <div class="space-y-3">
-                                    <!-- FIX: Added 'event' to toggleLever calls -->
-                                    <div class="lever-card p-3 rounded-lg flex items-start gap-3 cursor-pointer" onclick="toggleLever(event, 'roi-closing')">
-                                        <input type="checkbox" id="roi-closing" onchange="calculateROI()" class="lever-checkbox mt-1">
-                                        <div><span class="block text-sm font-bold text-slate-700">📉 Bokslutspivoten</span><span class="text-xs text-slate-500">Korta bokslutet (5 dagar -> 4h).</span></div>
-                                    </div>
-                                    <div class="lever-card p-3 rounded-lg flex items-start gap-3 cursor-pointer" onclick="toggleLever(event, 'roi-error')">
-                                        <input type="checkbox" id="roi-error" onchange="calculateROI()" class="lever-checkbox mt-1">
-                                        <div><span class="block text-sm font-bold text-slate-700">✅ Felmarginalskostnad</span><span class="text-xs text-slate-500">Minska felaktiga ordrar/fakturor.</span></div>
-                                    </div>
-                                    <div class="lever-card p-3 rounded-lg flex items-start gap-3 cursor-pointer" onclick="toggleLever(event, 'roi-scale')">
-                                        <input type="checkbox" id="roi-scale" onchange="calculateROI()" class="lever-checkbox mt-1">
-                                        <div><span class="block text-sm font-bold text-slate-700">🚀 Skalbarhet</span><span class="text-xs text-slate-500">Undvik nyanställning vid tillväxt.</span></div>
-                                    </div>
-                                </div>
+                    <!-- Statistics -->
+                    <div class="dash-card">
+                        <h3 class="text-sm font-bold text-slate-500 uppercase mb-4 tracking-wider flex items-center gap-2"><i class="fa-solid fa-chart-pie text-indigo-500"></i> Min Session (Just nu)</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="dash-stat-box">
+                                <div id="count-total" class="dash-stat-value">0</div>
+                                <div class="dash-stat-label">Samtal</div>
                             </div>
-
-                            <div class="bg-slate-800 text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
-                                <div class="absolute top-0 right-0 w-32 h-32 bg-green-500 rounded-full blur-3xl opacity-20 -mr-10 -mt-10"></div>
-                                <div class="relative z-10">
-                                    <p class="text-slate-400 text-xs uppercase font-bold mb-1">Netto Besparing År 1</p>
-                                    <p class="text-3xl font-bold text-green-400" id="res-money">0 kr</p>
-                                    <p class="text-xs text-slate-500 mt-2">*Efter avdrag för startavgift & månadskostnad.</p>
-                                </div>
+                            <div class="dash-stat-box">
+                                <div id="count-bra" class="dash-stat-value">0</div>
+                                <div class="dash-stat-label">Antal "Bra"</div>
+                            </div>
+                            <div class="dash-stat-box dash-big-stat col-span-2">
+                                <div id="hitrate" class="dash-stat-value">-</div>
+                                <div class="dash-stat-label">Samtal per JA</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- RIGHT SPLIT: FULL NEEDS ANALYSIS FORM -->
-                    <div class="w-1/2 overflow-y-auto custom-scrollbar p-6 bg-white">
-                        <div id="behovsanalys-container">
-                            <div id="success-message">
-                                <h3>Tack! 🚀</h3>
-                                <p>Din analys är inskickad. Vi hör av oss inom kort!</p>
-                                <button onclick="location.reload()" class="mt-4 text-blue-600 underline">Starta om</button>
-                            </div>
-
-                            <div id="form-content-wrapper">
-                                <div class="progress-wrapper">
-                                    <div class="progress-bg"><div class="progress-bar" id="progressBar"></div></div>
-                                    <div class="step-indicator">Steg <span id="stepCount">1</span> av 5</div>
-                                </div>
-
-                                <form id="customForm" action="https://hooks.zapier.com/hooks/catch/25909526/ue4p4vt/" method="POST">
-                                    <!-- STEG 1 -->
-                                    <div class="form-step active" data-step="1">
-                                        <h3>Grundläggande Info 🏢</h3>
-                                        <p class="step-desc">För att vi ska förstå din verksamhets storlek och struktur.</p>
-                                        <label>Ditt namn</label>
-                                        <input type="text" name="namn" required placeholder="Förnamn Efternamn" />
-                                        <div class="radio-group" style="margin-bottom:0">
-                                            <div style="flex:1;margin-right:10px">
-                                                <label>Företagsnamn</label>
-                                                <input type="text" name="foretag" required placeholder="Bolaget AB" />
-                                            </div>
-                                            <div style="flex:1">
-                                                <label>Bransch</label>
-                                                <input type="text" name="bransch" required placeholder="T.ex. Retail / Konsult" />
-                                            </div>
-                                        </div>
-                                        <label>Din roll</label>
-                                        <select name="roll" required>
-                                            <option value disabled selected>Välj din roll...</option>
-                                            <option value="VD/Ägare">VD / Grundare / Ägare</option>
-                                            <option value="Marknad/Säljchef">Marknads- / Säljchef</option>
-                                            <option value="Admin/Operations">Admin / Operations</option>
-                                            <option value="Annat">Annat</option>
-                                        </select>
-                                        <label>Antal anställda (Totalt)</label>
-                                        <div class="radio-group">
-                                            <div class="radio-card"><input type="radio" name="anstallda" id="size1" value="1-5" checked /><label for="size1">1-5</label></div>
-                                            <div class="radio-card"><input type="radio" name="anstallda" id="size2" value="6-20" /><label for="size2">6-20</label></div>
-                                            <div class="radio-card"><input type="radio" name="anstallda" id="size3" value="21-50" /><label for="size3">21-50</label></div>
-                                            <div class="radio-card"><input type="radio" name="anstallda" id="size4" value="50+" /><label for="size4">50+</label></div>
-                                        </div>
-                                        <div class="btn-group" style="justify-content:flex-end">
-                                            <button type="button" class="form-btn btn-next">Nästa steg ➔</button>
-                                        </div>
-                                    </div>
-
-                                    <!-- STEG 2 -->
-                                    <div class="form-step" data-step="2">
-                                        <h3>Era System 💻</h3>
-                                        <p class="step-desc">Vilka verktyg använder ni idag?</p>
-                                        <label>E-handelsplattform / Hemsida</label>
-                                        <input type="text" name="system_webb" placeholder="T.ex. Shopify, WooCommerce..." />
-                                        <label>Affärs- &amp; Bokföringssystem</label>
-                                        <input type="text" name="system_erp" placeholder="T.ex. Fortnox, Visma..." />
-                                        <label>CRM / Säljstöd</label>
-                                        <input type="text" name="system_crm" placeholder="T.ex. HubSpot, Pipedrive..." />
-                                        <label>Kommunikation</label>
-                                        <div class="radio-group">
-                                            <div class="radio-card"><input type="radio" name="system_comm" id="comm1" value="Slack" /><label for="comm1">Slack</label></div>
-                                            <div class="radio-card"><input type="radio" name="system_comm" id="comm2" value="Teams" /><label for="comm2">Teams</label></div>
-                                            <div class="radio-card"><input type="radio" name="system_comm" id="comm3" value="Google" /><label for="comm3">Google/Email</label></div>
-                                            <div class="radio-card"><input type="radio" name="system_comm" id="comm4" value="Annat" /><label for="comm4">Annat</label></div>
-                                        </div>
-                                        <div class="btn-group">
-                                            <button type="button" class="form-btn btn-prev">⬅ Tillbaka</button>
-                                            <button type="button" class="form-btn btn-next">Nästa steg ➔</button>
-                                        </div>
-                                    </div>
-
-                                    <!-- STEG 3 -->
-                                    <div class="form-step" data-step="3">
-                                        <h3>Processer &amp; Utmaningar ⚙️</h3>
-                                        <p class="step-desc">Var skaver det mest?</p>
-                                        <label>Primärt mål med automation?</label>
-                                        <select name="goal_primary">
-                                            <option value disabled selected>Vad är viktigast?</option>
-                                            <option value="Spara tid">Spara tid / Minska admin</option>
-                                            <option value="Öka försäljning">Öka försäljning / Konvertering</option>
-                                            <option value="Minska fel">Minska manuella fel</option>
-                                            <option value="Kundnöjdhet">Bättre kundupplevelse</option>
-                                        </select>
-                                        <label>Beskriv manuellt arbete ni gör idag</label>
-                                        <textarea name="process_manual_tasks" rows="3" placeholder="Vi lägger mycket tid på att..."></textarea>
-                                        <label>Uppskattad tid på admin/vecka?</label>
-                                        <div class="radio-group">
-                                            <div class="radio-card"><input type="radio" name="time_waste" id="tw1" value="0-5h" /><label for="tw1">0-5 tim</label></div>
-                                            <div class="radio-card"><input type="radio" name="time_waste" id="tw2" value="5-10h" /><label for="tw2">5-10 tim</label></div>
-                                            <div class="radio-card"><input type="radio" name="time_waste" id="tw3" value="10-20h" /><label for="tw3">10-20 tim</label></div>
-                                            <div class="radio-card"><input type="radio" name="time_waste" id="tw4" value="20h+" /><label for="tw4">20+ tim</label></div>
-                                        </div>
-                                        <label>Order/Transaktionsvolym per månad (ca)</label>
-                                        <input type="text" name="volume" placeholder="T.ex. 50 ordrar/mån" />
-                                        <div class="btn-group">
-                                            <button type="button" class="form-btn btn-prev">⬅ Tillbaka</button>
-                                            <button type="button" class="form-btn btn-next">Nästa steg ➔</button>
-                                        </div>
-                                    </div>
-
-                                    <!-- STEG 4 -->
-                                    <div class="form-step" data-step="4">
-                                        <h3>Kundtjänst &amp; AI 🤖</h3>
-                                        <p class="step-desc">Om ni är intresserade av chatbots/AI-assistenter.</p>
-                                        <label>Hur sker support idag?</label>
-                                        <input type="text" name="support_current" placeholder="T.ex. Mail, telefon, Facebook..." />
-                                        <label>Vanligaste återkommande frågorna?</label>
-                                        <textarea name="support_faq" rows="2" placeholder="T.ex. 'Var är mitt paket?', 'Öppettider'..."></textarea>
-                                        <label>Om ni skaffar en AI-bot, vad ska den göra?</label>
-                                        <select name="bot_goal">
-                                            <option value="Support">Support &amp; Avlastning</option>
-                                            <option value="Sales">Säljstöd &amp; Leads</option>
-                                            <option value="Both">Både och</option>
-                                            <option value="NotInterested">Ej aktuellt just nu</option>
-                                        </select>
-                                        <div class="btn-group">
-                                            <button type="button" class="form-btn btn-prev">⬅ Tillbaka</button>
-                                            <button type="button" class="form-btn btn-next">Sista steget ➔</button>
-                                        </div>
-                                    </div>
-
-                                    <!-- STEG 5 -->
-                                    <div class="form-step" data-step="5">
-                                        <h3>Slutspurten! 🚀</h3>
-                                        <p class="step-desc">Lämna dina kontaktuppgifter.</p>
-                                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
-                                            <div>
-                                                <label>Start</label>
-                                                <select name="timeline">
-                                                    <option value="ASAP">Snarast</option>
-                                                    <option value="1 month">1 mån</option>
-                                                    <option value="Q3/Q4">Senare</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label>Budget</label>
-                                                <select name="budget">
-                                                    <option value="Start">Startpaket</option>
-                                                    <option value="Mid">Helhet</option>
-                                                    <option value="Unknown">Vet ej</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <label>Telefonnummer</label>
-                                        <input type="tel" name="telefon" required placeholder="070-123 45 67" />
-                                        <label>Din e-postadress</label>
-                                        <input type="email" name="email" required placeholder="namn@foretag.se" style="border:2px solid #e2e8f0" />
-                                        <label>Önskemål om tid för kontakt?</label>
-                                        <input type="text" name="contact_time" placeholder="T.ex. Tisdag förmiddag" />
-                                        <div class="btn-group">
-                                            <button type="button" class="form-btn btn-prev">⬅ Tillbaka</button>
-                                            <button type="submit" class="form-btn btn-submit">Skicka analys</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -672,10 +490,261 @@
                 </div>
             </div>
 
-            <!-- VIEW 4: CLOSING (CALENDLY) -->
+            <!-- VIEW 4: DISCOVERY & ROI (Moved to 4th pos visually/logically, reused structure) -->
+            <div id="view-discovery" class="phase-view hidden h-full flex flex-col overflow-hidden">
+                <div class="bg-indigo-50 border-b border-indigo-100 px-8 py-4 shrink-0 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-indigo-900"><i class="fa-solid fa-magnifying-glass mr-2"></i>Steg 4: Analysera & Kalkylera</h2>
+                        <p class="text-sm text-indigo-600 font-medium tracking-tight">
+                            <span class="font-bold">Agila:</span> Vi anpassar oss • <span class="font-bold">Tro:</span> Vi tror stenhårt på det vi gör • <span class="font-bold">Frekvens:</span> Affärer leder till affärer - högt tempo!
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex-1 flex overflow-hidden">
+                    <!-- LEFT SPLIT: REALISTIC ROI CALCULATOR -->
+                    <div class="w-1/2 overflow-y-auto custom-scrollbar p-6 bg-slate-50 border-r border-slate-200">
+                        <div class="max-w-xl mx-auto">
+                            <!-- ROI Calculator Content -->
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-calculator text-indigo-500"></i> ROI Kalkylator</h3>
+                                <span class="text-[10px] bg-white border border-slate-200 px-2 py-1 rounded text-slate-500">Inkl. 45% Overhead</span>
+                            </div>
+                            
+                            <!-- 1. Salary & Employees -->
+                            <div class="mb-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                                <div class="mb-4">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">1. Snittlön (per person)</label>
+                                    <select id="roi-salary-level" onchange="calculateROI()" class="w-full p-3 border border-slate-200 rounded-lg text-sm bg-slate-50 font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
+                                        <option value="43500">Junior / Mindre ort (43 500 kr)</option>
+                                        <option value="55100" selected>Median / Standard (55 100 kr)</option>
+                                        <option value="68000">Senior / Storstad (68 000 kr)</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">2. Antal anställda (som berörs)</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="number" id="roi-employees" value="1" min="1" onchange="calculateROI()" class="w-20 p-3 border border-slate-200 rounded-lg text-sm bg-slate-50 font-bold text-center focus:ring-2 focus:ring-indigo-500 outline-none">
+                                        <span class="text-xs text-slate-400">st personer som sparar tid.</span>
+                                    </div>
+                                </div>
+                                <!-- NEW: Efficiency Slider -->
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <label class="block text-xs font-bold text-slate-500 uppercase">3. Effektivitet (%)</label>
+                                        <span class="text-xs font-bold text-indigo-600" id="roi-efficiency-display">80%</span>
+                                    </div>
+                                    <input type="range" id="roi-efficiency" min="50" max="100" value="80" step="5" oninput="calculateROI()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                                    <p class="text-[10px] text-slate-400 mt-1 italic">Lägre effektivitet = Dyrare arbetstid för bolaget (Högre ROI).</p>
+                                </div>
+                            </div>
+
+                            <div class="mb-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-4">4. ROI Hävstänger</label>
+                                <div class="mb-6 pb-4 border-b border-slate-100">
+                                    <div class="flex justify-between mb-2">
+                                        <span class="text-sm font-bold text-slate-700 flex items-center gap-2"><i class="fa-regular fa-clock text-indigo-500"></i> Tidsstöld (per person)</span>
+                                        <span class="text-indigo-600 font-bold" id="roi-hours-display">2 h/dag</span>
+                                    </div>
+                                    <input type="range" id="roi-hours" min="0" max="8" value="2" step="0.5" oninput="calculateROI()" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                                    <p class="text-[10px] text-slate-400 mt-1 italic">"Mänskligt lim" mellan system.</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="lever-card p-3 rounded-lg flex items-start gap-3 cursor-pointer" onclick="toggleLever(event, 'roi-closing')">
+                                        <input type="checkbox" id="roi-closing" onchange="calculateROI()" class="lever-checkbox mt-1">
+                                        <div><span class="block text-sm font-bold text-slate-700">📉 Bokslutspivoten</span><span class="text-xs text-slate-500">Korta bokslutet (5 dagar -> 4h).</span></div>
+                                    </div>
+                                    <div class="lever-card p-3 rounded-lg flex items-start gap-3 cursor-pointer" onclick="toggleLever(event, 'roi-error')">
+                                        <input type="checkbox" id="roi-error" onchange="calculateROI()" class="lever-checkbox mt-1">
+                                        <div><span class="block text-sm font-bold text-slate-700">✅ Felmarginalskostnad</span><span class="text-xs text-slate-500">Minska felaktiga ordrar/fakturor.</span></div>
+                                    </div>
+                                    <div class="lever-card p-3 rounded-lg flex items-start gap-3 cursor-pointer" onclick="toggleLever(event, 'roi-scale')">
+                                        <input type="checkbox" id="roi-scale" onchange="calculateROI()" class="lever-checkbox mt-1">
+                                        <div><span class="block text-sm font-bold text-slate-700">🚀 Skalbarhet</span><span class="text-xs text-slate-500">Undvik nyanställning vid tillväxt.</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800 text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-32 h-32 bg-green-500 rounded-full blur-3xl opacity-20 -mr-10 -mt-10"></div>
+                                <div class="relative z-10">
+                                    <p class="text-slate-400 text-xs uppercase font-bold mb-1">Netto Besparing År 1</p>
+                                    <p class="text-3xl font-bold text-green-400" id="res-money">0 kr</p>
+                                    <p class="text-xs text-slate-500 mt-2">*Efter avdrag för startavgift & månadskostnad.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT SPLIT: FULL NEEDS ANALYSIS FORM -->
+                    <div class="w-1/2 overflow-y-auto custom-scrollbar p-6 bg-white">
+                        <div id="behovsanalys-container">
+                            <div id="success-message">
+                                <h3>Tack! 🚀</h3>
+                                <p>Din analys är inskickad. Vi hör av oss inom kort!</p>
+                                <button onclick="location.reload()" class="mt-4 text-blue-600 underline">Starta om</button>
+                            </div>
+
+                            <div id="form-content-wrapper">
+                                <div class="progress-wrapper">
+                                    <div class="progress-bg"><div class="progress-bar" id="progressBar"></div></div>
+                                    <div class="step-indicator">Steg <span id="stepCount">1</span> av 5</div>
+                                </div>
+
+                                <form id="customForm" action="https://hooks.zapier.com/hooks/catch/25909526/ue4p4vt/" method="POST">
+                                    <!-- STEG 1 -->
+                                    <div class="form-step active" data-step="1">
+                                        <h3>Grundläggande Info 🏢</h3>
+                                        <p class="step-desc">För att vi ska förstå din verksamhets storlek och struktur.</p>
+                                        <label>Ditt namn</label>
+                                        <input type="text" name="namn" required placeholder="Förnamn Efternamn" />
+                                        <div class="radio-group" style="margin-bottom:0">
+                                            <div style="flex:1;margin-right:10px">
+                                                <label>Företagsnamn</label>
+                                                <input type="text" name="foretag" required placeholder="Bolaget AB" />
+                                            </div>
+                                            <div style="flex:1">
+                                                <label>Bransch</label>
+                                                <input type="text" name="bransch" required placeholder="T.ex. Retail / Konsult" />
+                                            </div>
+                                        </div>
+                                        <label>Din roll</label>
+                                        <select name="roll" required>
+                                            <option value disabled selected>Välj din roll...</option>
+                                            <option value="VD/Ägare">VD / Grundare / Ägare</option>
+                                            <option value="Marknad/Säljchef">Marknads- / Säljchef</option>
+                                            <option value="Admin/Operations">Admin / Operations</option>
+                                            <option value="Annat">Annat</option>
+                                        </select>
+                                        <label>Antal anställda (Totalt)</label>
+                                        <div class="radio-group">
+                                            <div class="radio-card"><input type="radio" name="anstallda" id="size1" value="1-5" checked /><label for="size1">1-5</label></div>
+                                            <div class="radio-card"><input type="radio" name="anstallda" id="size2" value="6-20" /><label for="size2">6-20</label></div>
+                                            <div class="radio-card"><input type="radio" name="anstallda" id="size3" value="21-50" /><label for="size3">21-50</label></div>
+                                            <div class="radio-card"><input type="radio" name="anstallda" id="size4" value="50+" /><label for="size4">50+</label></div>
+                                        </div>
+                                        <div class="btn-group" style="justify-content:flex-end">
+                                            <button type="button" class="form-btn btn-next">Nästa steg ➔</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- STEG 2 -->
+                                    <div class="form-step" data-step="2">
+                                        <h3>Era System 💻</h3>
+                                        <p class="step-desc">Vilka verktyg använder ni idag?</p>
+                                        <label>E-handelsplattform / Hemsida</label>
+                                        <input type="text" name="system_webb" placeholder="T.ex. Shopify, WooCommerce..." />
+                                        <label>Affärs- &amp; Bokföringssystem</label>
+                                        <input type="text" name="system_erp" placeholder="T.ex. Fortnox, Visma..." />
+                                        <label>CRM / Säljstöd</label>
+                                        <input type="text" name="system_crm" placeholder="T.ex. HubSpot, Pipedrive..." />
+                                        <label>Kommunikation</label>
+                                        <div class="radio-group">
+                                            <div class="radio-card"><input type="radio" name="system_comm" id="comm1" value="Slack" /><label for="comm1">Slack</label></div>
+                                            <div class="radio-card"><input type="radio" name="system_comm" id="comm2" value="Teams" /><label for="comm2">Teams</label></div>
+                                            <div class="radio-card"><input type="radio" name="system_comm" id="comm3" value="Google" /><label for="comm3">Google/Email</label></div>
+                                            <div class="radio-card"><input type="radio" name="system_comm" id="comm4" value="Annat" /><label for="comm4">Annat</label></div>
+                                        </div>
+                                        <div class="btn-group">
+                                            <button type="button" class="form-btn btn-prev">⬅ Tillbaka</button>
+                                            <button type="button" class="form-btn btn-next">Nästa steg ➔</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- STEG 3 -->
+                                    <div class="form-step" data-step="3">
+                                        <h3>Processer &amp; Utmaningar ⚙️</h3>
+                                        <p class="step-desc">Var skaver det mest?</p>
+                                        <label>Primärt mål med automation?</label>
+                                        <select name="goal_primary">
+                                            <option value disabled selected>Vad är viktigast?</option>
+                                            <option value="Spara tid">Spara tid / Minska admin</option>
+                                            <option value="Öka försäljning">Öka försäljning / Konvertering</option>
+                                            <option value="Minska fel">Minska manuella fel</option>
+                                            <option value="Kundnöjdhet">Bättre kundupplevelse</option>
+                                        </select>
+                                        <label>Beskriv manuellt arbete ni gör idag</label>
+                                        <textarea name="process_manual_tasks" rows="3" placeholder="Vi lägger mycket tid på att..."></textarea>
+                                        <label>Uppskattad tid på admin/vecka?</label>
+                                        <div class="radio-group">
+                                            <div class="radio-card"><input type="radio" name="time_waste" id="tw1" value="0-5h" /><label for="tw1">0-5 tim</label></div>
+                                            <div class="radio-card"><input type="radio" name="time_waste" id="tw2" value="5-10h" /><label for="tw2">5-10 tim</label></div>
+                                            <div class="radio-card"><input type="radio" name="time_waste" id="tw3" value="10-20h" /><label for="tw3">10-20 tim</label></div>
+                                            <div class="radio-card"><input type="radio" name="time_waste" id="tw4" value="20h+" /><label for="tw4">20+ tim</label></div>
+                                        </div>
+                                        <label>Order/Transaktionsvolym per månad (ca)</label>
+                                        <input type="text" name="volume" placeholder="T.ex. 50 ordrar/mån" />
+                                        <div class="btn-group">
+                                            <button type="button" class="form-btn btn-prev">⬅ Tillbaka</button>
+                                            <button type="button" class="form-btn btn-next">Nästa steg ➔</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- STEG 4 -->
+                                    <div class="form-step" data-step="4">
+                                        <h3>Kundtjänst &amp; AI 🤖</h3>
+                                        <p class="step-desc">Om ni är intresserade av chatbots/AI-assistenter.</p>
+                                        <label>Hur sker support idag?</label>
+                                        <input type="text" name="support_current" placeholder="T.ex. Mail, telefon, Facebook..." />
+                                        <label>Vanligaste återkommande frågorna?</label>
+                                        <textarea name="support_faq" rows="2" placeholder="T.ex. 'Var är mitt paket?', 'Öppettider'..."></textarea>
+                                        <label>Om ni skaffar en AI-bot, vad ska den göra?</label>
+                                        <select name="bot_goal">
+                                            <option value="Support">Support &amp; Avlastning</option>
+                                            <option value="Sales">Säljstöd &amp; Leads</option>
+                                            <option value="Both">Både och</option>
+                                            <option value="NotInterested">Ej aktuellt just nu</option>
+                                        </select>
+                                        <div class="btn-group">
+                                            <button type="button" class="form-btn btn-prev">⬅ Tillbaka</button>
+                                            <button type="button" class="form-btn btn-next">Sista steget ➔</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- STEG 5 -->
+                                    <div class="form-step" data-step="5">
+                                        <h3>Slutspurten! 🚀</h3>
+                                        <p class="step-desc">Lämna dina kontaktuppgifter.</p>
+                                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+                                            <div>
+                                                <label>Start</label>
+                                                <select name="timeline">
+                                                    <option value="ASAP">Snarast</option>
+                                                    <option value="1 month">1 mån</option>
+                                                    <option value="Q3/Q4">Senare</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label>Budget</label>
+                                                <select name="budget">
+                                                    <option value="Start">Startpaket</option>
+                                                    <option value="Mid">Helhet</option>
+                                                    <option value="Unknown">Vet ej</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <label>Telefonnummer</label>
+                                        <input type="tel" name="telefon" required placeholder="070-123 45 67" />
+                                        <label>Din e-postadress</label>
+                                        <input type="email" name="email" required placeholder="namn@foretag.se" style="border:2px solid #e2e8f0" />
+                                        <label>Önskemål om tid för kontakt?</label>
+                                        <input type="text" name="contact_time" placeholder="T.ex. Tisdag förmiddag" />
+                                        <div class="btn-group">
+                                            <button type="button" class="form-btn btn-prev">⬅ Tillbaka</button>
+                                            <button type="submit" class="form-btn btn-submit">Skicka analys</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 5: CLOSING (CALENDLY) -->
             <div id="view-closing" class="phase-view hidden h-full flex flex-col p-8 overflow-y-auto custom-scrollbar items-center">
                 <h3 class="text-2xl font-bold text-slate-700 mb-6">Boka in kunden</h3>
-                <div class="calendly-inline-widget" data-url="https://calendly.com/samify-info/30min" style="min-width:320px;height:700px;width:100%;"></div>
+                <div class="calendly-inline-widget" data-url="https://calendly.com/samify-info/60min" style="min-width:320px;height:700px;width:100%;"></div>
                 <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
             </div>
 
@@ -709,6 +778,75 @@
 
     <!-- JAVASCRIPT -->
     <script>
+        // --- DASHBOARD LOGIC ---
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbymOB9LdIGV4d25c1VNxMeg6iEAWrezb9KUhmxfCLwH9nDVvlRHWmtodFsCG4wwbhOK/exec";
+        let sessionStats = { total: 0, bra: 0 };
+
+        function logga(typ) {
+            // 1. Kontrollera att namn är valt
+            var userSelect = document.getElementById('currentUser');
+            var user = userSelect.value;
+            
+            if (!user) {
+                alert("⚠️ Du måste välja ditt namn i listan högst upp först!");
+                userSelect.focus();
+                return;
+            }
+
+            var foretagInput = document.getElementById('foretagInput');
+            var foretagNamn = foretagInput.value;
+            
+            // 2. Visa att det jobbar (visuellt)
+            document.body.style.cursor = "wait"; 
+            document.getElementById('error-box').style.display = 'none';
+
+            // 3. Förbered data
+            var payload = {
+                user: user,
+                company: foretagNamn,
+                type: typ
+            };
+
+            // 4. Skicka till Google med fetch
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors", // Viktigt för att slippa felmeddelanden
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                // Detta körs när webbläsaren skickat iväg datan
+                console.log("Skickat!");
+                
+                // Uppdatera siffror på skärmen
+                uppdateraLokalStatistik(typ);
+                
+                // Återställ formulär
+                foretagInput.value = "";
+                foretagInput.focus();
+                document.body.style.cursor = "default";
+            })
+            .catch(error => {
+                console.error("Fel:", error);
+                var errorBox = document.getElementById('error-box');
+                errorBox.style.display = 'block';
+                errorBox.innerText = "Kunde inte spara. Kolla internet.";
+                document.body.style.cursor = "default";
+            });
+        }
+
+        function uppdateraLokalStatistik(typ) {
+            sessionStats.total++;
+            if(typ === "Bra") sessionStats.bra++;
+
+            document.getElementById('count-total').innerText = sessionStats.total;
+            document.getElementById('count-bra').innerText = sessionStats.bra;
+
+            // Räkna ut hitrate
+            var hitrate = sessionStats.bra > 0 ? (sessionStats.total / sessionStats.bra).toFixed(1) : "-";
+            document.getElementById('hitrate').innerText = hitrate;
+        }
+
         // --- SCRIPT DATA ---
         
         // Definition of specific Question Tracks
